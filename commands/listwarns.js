@@ -8,10 +8,10 @@ const fs = require("fs");
 
 module.exports.run = async (client, message, args, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) utils.Console(err)
+        if (err) bot.console(err)
         let wUser = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0]) || message.author.id
         sqlcon.query(`SELECT * FROM warnsnew WHERE UserID = '${wUser.id}' AND GuildID = '${message.guild.id}'`, (err, warnings) => {
-            if (err) utils.Console(err)
+            if (err) bot.console(err)
 
             if (warnings.length < 1) {
                 message.channel.send("That user has no warns!")

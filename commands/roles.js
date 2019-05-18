@@ -8,7 +8,7 @@ const fs = require("fs");
 
 module.exports.run = async (client, message, args, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) utils.Console(err)
+        if (err) bot.console(err)
         if (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.find(role => role.id === rows[0].AdminRole)) {
             if (args[0] === "list") {
                 let RList = "```All current roles and their IDs\n"

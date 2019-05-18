@@ -80,17 +80,6 @@ const play_act = [
 ];
 
 client.on("ready", () => {
-
-	const remote = `https://github.com/PhoenProject/Corruption`;
-	require('simple-git')()
-		.addConfig('user.name', 'PhoenProject')
-		.addConfig('user.email', config.GitEmail)
-		.clean("-f -n")
-		.stash()
-		//.silent(true)
-		.fetch(remote, "master")
-		.exec(() => console.log('finished'));
-
 	let GCount = client.guilds
 	let UCount = 0
 	GCount.forEach(element => {
@@ -625,13 +614,25 @@ function Restart(message) {
 		message.channel.send("Are you 100% sure you want to restart the bot?")
 		message.channel.awaitMessages(filter, { max: 1, time: 35000, errors: ['time'] }).then((Confirmation) => {
 			if (Confirmation.first().toString().toLowerCase() === "yes") {
+				message.channel.send("I will restart momentarily...")
 
-				var spawn = exec('node CorruptionBot.js', {
-					detached: true
-				})
-				process.exit()
-				//shell.exec("chmod +x  ./restart.sh")
-				//process.exit()
+				const remote = `https://github.com/PhoenProject/CorruptionBot`;
+				require('simple-git')()
+					.addConfig('user.name', 'PhoenProject')
+					.addConfig('user.email', config.GitEmail)
+					.clean("-f -n")
+					.stash()
+					//.silent(true)
+					.fetch(remote, "master")
+					.exec(() => {
+						console.log('finished')
+
+						var spawn = exec('node CorruptionBot.js', {
+							detached: true
+						});
+						process.exit()
+					})
+
 			}
 			else if (Confirmation.first().toString().toLowerCase() === "no") {
 				message.channel.send("Restart Aborted!");

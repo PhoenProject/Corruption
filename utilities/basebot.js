@@ -23,7 +23,7 @@ module.exports.Nping = (client, message, MsgContent) => {
             noping: false
         }
         fs.writeFile("./noping.json", JSON.stringify(noping), (err) => {
-            if (err) console.log(err)
+            if (err) utils.Console(err)
         });
     }
     if (noping[nPing].noping === true && !message.member.hasPermission("MANAGE_MESSAGES")) {
@@ -41,7 +41,7 @@ module.exports.Nping = (client, message, MsgContent) => {
         Warns[wUGID].reason += `**Warn ${Warns[wUGID].warns}:** ${reason} |||`
 
         fs.writeFile("./warnings.json", JSON.stringify(Warns), (err) => {
-            if (err) console.log(err)
+            if (err) utils.Console(err)
         });
 
         let warnEmbed = new Discord.RichEmbed()

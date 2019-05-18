@@ -8,7 +8,7 @@ const fs = require("fs");
 
 module.exports.run = async (client, message, args, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) throw err
+        if (err) utils.Console(err) 
         console.log(args[0])
         if (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.find(role => role.id === rows[0].AdminEole)) {
             if (args[0] === "enable") {

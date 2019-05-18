@@ -22,7 +22,7 @@ client.aliases = new Discord.Collection();
 
 
 fs.readdir("./commands/", (err, files) => {
-	if (err) console.log(err)
+	if (err) utils.Console(err)
 	let jsfile = files.filter(f => f.split(".").pop() === "js");
 	if (jsfile.length <= 0) {
 		console.log(`Couldn't find commands.`);
@@ -47,7 +47,7 @@ var sqlcon = mysql.createConnection({
 	charset: 'utf8mb4'
 });
 sqlcon.connect(err => {
-	if (err) throw err;
+	if (err) utils.Console(err)
 	console.log("Connected To Database");
 })
 sqlcon.on('error', error => {
@@ -109,7 +109,7 @@ client.on("guildCreate", guild => {
 	utils.Console(cmessage, client)
 
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${guild.id}'`, (err, rows) => {
-		if (err) throw err
+		if (err) utils.Console(err)
 		if (rows.length < 1) {
 			CreateGuildPrefs(guild, sqlcon)
 		}
@@ -121,7 +121,7 @@ client.on("guildDelete", guild => {
 });
 client.on("guildMemberAdd", member => {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-		if (err) throw err
+		if (err) utils.Console(err) 
 		if (rows[0].MemLog === 'true') {
 			let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
 			if (mlogchannel) { AddGuildMember(member, mlogchannel) }
@@ -132,7 +132,7 @@ client.on("guildMemberAdd", member => {
 });
 client.on("guildMemberRemove", member => {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-		if (err) throw err
+		if (err) utils.Console(err) 
 		if (rows[0] != undefined) {
 			if (rows[0].MemLog === 'true') {
 				let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
@@ -155,7 +155,7 @@ client.on("guildMemberRemove", member => {
 });
 client.on("guildMemberUpdate", function (oldMem, newMem) {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${oldMem.guild.id}'`, (err, rows) => {
-		if (err) throw err
+		if (err) utils.Console(err)
 		if (rows[0] != undefined) {
 			if (rows[0].MemLog === 'true' && oldMem.nickname != newMem.nickname) {
 				let mlogchannel = oldMem.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
@@ -183,7 +183,7 @@ client.on("messageDelete", async message => {
 		let entry = logs.entries.first();
 
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-			if (err) throw err
+			if (err) utils.Console(err) 
 			if (message.mentions.members.first() != undefined && message.mentions.users.first().id != message.author.id
 				&& !message.mentions.users.first().bot && entry.createdTimestamp < (Date.now() - 5000))
 				return message.channel.send(`Damn son, ${message.author} ghost pinged ${message.mentions.members.first()}`)
@@ -196,7 +196,7 @@ client.on("messageUpdate", function (oldMSG, newMSG) {
 	if ((!oldMSG.guild || !oldMSG.channel) || (oldMSG.content === newMSG.content)) return
 	else if (oldMSG.guild && oldMSG.channel.type != "dm") {
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${oldMSG.guild.id}'`, (err, rows) => {
-			if (err) throw err
+			if (err) utils.Console(err)
 			if (rows[0].MsgLog === 'true') {
 				if (oldMSG != newMSG && oldMSG != null && newMSG != null && !newMSG.author.bot && (oldMSG.member != null && !newMSG.member != null)) {
 					let mlogchannel = oldMSG.guild.channels.find((channel => channel.id === rows[0].MsgLogChan));
@@ -299,10 +299,10 @@ function MessageCheck(message, sqlguild, sqlcon) {
 	}
 	else {
 		sqlcon.query(`SELECT * FROM chanprefs WHERE GuildID = '${message.guild.id}' AND ChannelID = '${message.channel.id}'`, (err, sqlchannelcreate) => {
-			if (err) throw err
+			if (err) utils.Console(err)
 			if (sqlchannelcreate.length < 1) { CreateChanPrefs(message, sqlcon) }
 			sqlcon.query(`SELECT * FROM chanprefs WHERE GuildID = '${message.guild.id}' AND ChannelID = '${message.channel.id}'`, (err, sqlchannel) => {
-				if (err) throw err
+				if (err) utils.Console(err)
 				if (!message.content.startsWith(sqlguild[0].Prefix) && sqlchannel[0].MsgVote === 'true') { MsgVoteChan(message, sqlcon, sqlguild) }
 				else if (message.content.startsWith(sqlguild[0].Prefix)) {
 					let Message = message.content.slice((sqlguild[0].Prefix).length);
@@ -374,6 +374,9 @@ function MessageCheck(message, sqlguild, sqlcon) {
 							break;
 						case "restart":
 							Restart(message)
+							break;
+						case "update":
+							Update(message)
 							break;
 						default:
 							if (commandfile) commandfile.run(client, message, args, sqlcon);
@@ -540,10 +543,7 @@ function Reloadcommand(message) {
 		message.channel.send("Reloading the command modules files now. Please wait...")
 		modulelist = "";
 		fs.readdir("./commands/", (err, files) => {
-			if (err) {
-				let cmessage = err;
-				utils.Console(cmessage, client)
-			};
+			if (err) utils.Console(err)
 			let jsfile = files.filter(f => f.split(".").pop() === "js");
 			if (jsfile.length <= 0) {
 				let cmessage = "Couldn't find commands.";
@@ -582,7 +582,7 @@ function Help(message, rows) {
 		let InfoCMDs = ''
 		let gPrefix = rows[0].Prefix
 
-		if (err) console.log(err)
+		if (err) utils.Console(err)
 		if (files.length < 1) return console.log("No files could be found!")
 		let cmdFiles = files.filter(f => f.split(".").pop() === "js");
 		cmdFiles.forEach((f, i) => {
@@ -638,7 +638,7 @@ function Restart(message) {
 					.clean("-f -n")
 					.stash()
 					//.silent(true)
-					.fetch(remote, "master")
+					.pull(remote, "master")
 					.exec(() => {
 						console.log('finished')
 
@@ -657,6 +657,26 @@ function Restart(message) {
 		})
 	}
 }
+function Update(message) {
+	if (message.author.id === config.ownerID) {
+		message.channel.send("Updating!")
 
+		const remote = `https://github.com/PhoenProject/CorruptionBot`;
+		require('simple-git')()
+			.addConfig('user.name', 'PhoenProject')
+			.addConfig('user.email', config.GitEmail)
+			.clean("-f -n")
+			.stash()
+			//.silent(true)
+			.pull(remote, "master")
+			.exec(() => {
+				message.channel.send("Update Complete!")
+			})
+
+	}
+	else if (Confirmation.first().toString().toLowerCase() === "no") {
+		message.channel.send("Restart Aborted!");
+	}
+}
 
 client.login(config.token);

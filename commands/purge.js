@@ -14,7 +14,7 @@ async function DeletionHandler(message, args, cmdused) {
 
 module.exports.run = async (client, message, args, sqlcon) => {
   sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-    if (err) throw err
+    if (err) utils.Console(err)
     if (message.member.roles.find(role => role.id === rows[0].ModRole) || message.member.roles.find(role => role.id === rows[0].AdminRole) || message.member.hasPermission("ADMINISTRATOR")) {
       let cmdused = "purge"
       let perm = "MANAGE_MESSAGES"

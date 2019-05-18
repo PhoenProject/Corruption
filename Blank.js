@@ -12,7 +12,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
   let hArgs = "" //Additional arguments to display in the help embed
   let desc = "" //Description of the command for the help embed
   sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-    if (err) throw err
+    if (err) utils.Console(err)
 
   })
 }

@@ -8,7 +8,7 @@ const fs = require("fs");
 
 module.exports.run = async (client, message, args, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) throw err
+        if (err) utils.Console(err)
         if (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.find(role => role.id === rows[0].AdminRole)) {
             if (args[0] === "messages") {
                 if (rows[0].MsgLogChan === "null") { message.channel.send("You must specify a logging channel first!") }

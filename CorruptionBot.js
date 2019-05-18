@@ -345,7 +345,22 @@ function MessageCheck(message, sqlguild, sqlcon) {
 						}
 					}
 					switch (cmd) {
+						case "heartofcorruption":
+						case "devserver":
+						case "hoc":
+							message.author.send("https://discord.gg/NUCDjPn")
+							break;
+						case "github":
+						case "gh":
+						case "git":
+						case "source":
+						case "code":
+						case "sourcecode":
+						case "sc":
+							message.author.send("https://github.com/PhoenProject/CorruptionBot")
 						case "help":
+						case "info":
+						case "commands":
 							sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => { Help(message, rows) })
 							break;
 						case "ping":

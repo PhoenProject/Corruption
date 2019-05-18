@@ -121,7 +121,7 @@ client.on("guildDelete", guild => {
 });
 client.on("guildMemberAdd", member => {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-		if (err) utils.Console(err) 
+		if (err) utils.Console(err)
 		if (rows[0].MemLog === 'true') {
 			let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
 			if (mlogchannel) { AddGuildMember(member, mlogchannel) }
@@ -132,7 +132,7 @@ client.on("guildMemberAdd", member => {
 });
 client.on("guildMemberRemove", member => {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-		if (err) utils.Console(err) 
+		if (err) utils.Console(err)
 		if (rows[0] != undefined) {
 			if (rows[0].MemLog === 'true') {
 				let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
@@ -183,7 +183,7 @@ client.on("messageDelete", async message => {
 		let entry = logs.entries.first();
 
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-			if (err) utils.Console(err) 
+			if (err) utils.Console(err)
 			if (message.mentions.members.first() != undefined && message.mentions.users.first().id != message.author.id
 				&& !message.mentions.users.first().bot && entry.createdTimestamp < (Date.now() - 5000))
 				return message.channel.send(`Damn son, ${message.author} ghost pinged ${message.mentions.members.first()}`)
@@ -220,38 +220,38 @@ client.on("messageUpdate", function (oldMSG, newMSG) {
 	}
 });
 client.on("message", async message => {
-	let args = message.content.split(' ')
-	if (message.author.bot || message.member == null || message.author == null) return
-	else if (!message.guild && message.author.id === config.ownerID) {
-		let MsgContent = message.content.split(' ')
-		if (MsgContent[0] === `${config.prefix}say`) {
-			let Guild = client.guilds.find(guild => guild.id === MsgContent[1]);
-			let Channel = Guild.channels.find(channel => channel.id === MsgContent[2]);
-			if (Guild === null) return message.reply("I was unable to find that guild");
-			else {
+		let args = message.content.split(' ')
+		if (message.author.bot || message.member == null || message.author == null) return
+		else if (!message.guild && message.author.id === config.ownerID) {
+			let MsgContent = message.content.split(' ')
+			if (MsgContent[0] === `${config.prefix}say`) {
+				let Guild = client.guilds.find(guild => guild.id === MsgContent[1]);
 				let Channel = Guild.channels.find(channel => channel.id === MsgContent[2]);
-				if (Channel === null) return message.reply("I was unable to find that channel");
+				if (Guild === null) return message.reply("I was unable to find that guild");
 				else {
-					let sMessage = MsgContent.slice(3).join(' ');
-					Channel.send(sMessage)
+					let Channel = Guild.channels.find(channel => channel.id === MsgContent[2]);
+					if (Channel === null) return message.reply("I was unable to find that channel");
+					else {
+						let sMessage = MsgContent.slice(3).join(' ');
+						Channel.send(sMessage)
+					}
 				}
 			}
 		}
-	}
-	else if (message.mentions.users.first() != undefined && message.mentions.users.first().id === client.user.id && args[1] === "help") {
-		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, PrefixCheck) => {
-			PingMessage(message, PrefixCheck)
-		})
-	}
-	else {
-		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, sqlguild) => {
-			autow.globalfilter(client, message, sqlcon)
-			autow.filter(client, message, sqlcon)
-			autow.massping(client, message, sqlcon)
+		else if (message.mentions.users.first() != undefined && message.mentions.users.first().id === client.user.id && args[1] === "help") {
+			sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, PrefixCheck) => {
+				PingMessage(message, PrefixCheck)
+			})
+		}
+		else {
+			sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, sqlguild) => {
+				autow.globalfilter(client, message, sqlcon)
+				autow.filter(client, message, sqlcon)
+				autow.massping(client, message, sqlcon)
 
-			MessageCheck(message, sqlguild, sqlcon)
-		});
-	}
+				MessageCheck(message, sqlguild, sqlcon)
+			});
+		}
 });
 
 client.on("debug", debug => {
@@ -659,6 +659,8 @@ function Restart(message) {
 }
 function Update(message) {
 	if (message.author.id === config.ownerID) {
+		var Updating = true;
+		client.user.setPresence({ game: { name: "myself update!", type: "WATCHING" }, status: 'dnd' })
 		message.channel.send("Updating!")
 
 		const remote = `https://github.com/PhoenProject/CorruptionBot`;
@@ -673,6 +675,8 @@ function Update(message) {
 				message.channel.send("Update Complete!")
 			})
 
+		client.user.setPresence({ game: { name: "with my updated code", type: "playing" }, status: 'online' })
+		message.channel.send("Update complete!")
 	}
 	else if (Confirmation.first().toString().toLowerCase() === "no") {
 		message.channel.send("Restart Aborted!");

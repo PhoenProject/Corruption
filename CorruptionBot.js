@@ -11,7 +11,7 @@ const moment = require("moment");
 const shell = require('shelljs');
 const fs = require("fs");
 const mysql = require("mysql");
-const { exec } = require("child_process")
+const { exec } = require("child_process");
 const { inspect } = require('util');
 const SteamAPI = require('steamapi');
 const steam = new SteamAPI(config.SteamAIPKey);
@@ -80,6 +80,17 @@ const play_act = [
 ];
 
 client.on("ready", () => {
+
+	const remote = `https://github.com/PhoenProject/Corruption`;
+	require('simple-git')()
+		.addConfig('user.name', 'PhoenProject')
+		.addConfig('user.email', config.GitEmail)
+		.clean("-f -n")
+		.stash()
+		//.silent(true)
+		.fetch(remote, "master")
+		.exec(() => console.log('finished'));
+
 	let GCount = client.guilds
 	let UCount = 0
 	GCount.forEach(element => {

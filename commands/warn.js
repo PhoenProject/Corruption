@@ -2,21 +2,6 @@ const Discord = require("discord.js");
 const utils = require('../utilities/utils.js');
 const moment = require("moment");
 
-/*
-  Sort out a better warning system that includes automatic removal of the warned role after 2 weeks.
-  MySQL Database Table
-
-  Name - Name of user
-  ID - ID of user
-  Count - Warn number
-  Reason - Reason for warn
-  Issuer - Who did the warn
-  GuildID - GuildID of the warn
-  ChannelID - ChannelID of where the warn was
-  MessageID - MessageID of the warn
-  Timestamp - Time it was issued
-*/
-
 async function AddWarn(message, member, reason, sqlcon) {
   sqlcon.query(`SELECT * FROM warnsnew WHERE UserID = '${message.mentions.users.first().id}' AND GuildID = '${message.guild.id}'`, (err, row) => {
     let sqlreason = reason.replace(`'`, '~')

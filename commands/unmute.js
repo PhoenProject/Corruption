@@ -11,7 +11,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
             let perm = "MANAGE_MESSAGES"
             let hArgs = "<user>"
             let desc = "Unmutes a muted user."
-            let Member = message.guild.member(message.mentions.members.first());
+            let Member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
             let mRole = message.guild.roles.find(role => role.name === "Muted")
             if (Member === null)
                 return message.channel.send("That member could not be found!");

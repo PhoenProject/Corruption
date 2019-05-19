@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const utils = require('../utilities/utils.js');
 const bot = require('../CorruptionBot.js')
+const moment = require("moment");
 
 module.exports.run = async (client, message, args, sqlcon) => {
   sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {

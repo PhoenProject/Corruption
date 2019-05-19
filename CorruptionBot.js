@@ -642,7 +642,7 @@ function Restart(message) {
 						console.log('finished')
 
 						setTimeout(function () {
-							var spawn = exec('node CorruptionBot.js', {
+							var spawn = exec('pm2 start CorruptionBot.js', {
 								detached: true
 							});
 							process.exit()

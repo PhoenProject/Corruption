@@ -671,11 +671,9 @@ function Update(message) {
 			//.silent(true)
 			.pull(remote, "master")
 			.exec(() => {
+				client.user.setPresence({ game: { name: "with my updated code", type: "playing" }, status: 'online' })
 				message.channel.send("Update Complete!")
 			})
-
-		client.user.setPresence({ game: { name: "with my updated code", type: "playing" }, status: 'online' })
-		message.channel.send("Update complete!")
 	}
 	else if (Confirmation.first().toString().toLowerCase() === "no") {
 		message.channel.send("Restart Aborted!");

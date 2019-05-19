@@ -16,11 +16,17 @@ const SteamAPI = require('steamapi');
 const bot = require('../CorruptionBot.js')
 
 module.exports.run = async (client, message, args, sqlcon) => {
-    message.channel.send("This command is disabled!")
+  let wMember = message.mentions.members.first() || message.guild.memers.find(member => member.name == args[1]) || message.guild.memers.find(member => member.id == args[1])
+  sqlcon.query(`SELECT * FROM warnsnew WHERE GuildID = '${message.guild.id}' AND DiscordID = '${wMember.id}'`, (err, rows) => {
+    if (err) bot.Console(err)
+    if (rows == undefined || rows[0] == undefined){
+      message.channel.send("That user has no warnings!")
+    }
+  })
 }
 module.exports.config = {
-    name: "noping",
-    aliases: ["nping"],
-    info: "Adds a user to the NoPing list, where pinging them will result in an automatic warn",
-    type: "mod"
+  name: "removewarn",
+  aliases: ["delwarn", "rwarn", "unwarn"],
+  info: "Removes 1 warn from a user",
+  type: "mod"
 }

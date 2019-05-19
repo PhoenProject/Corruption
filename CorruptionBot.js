@@ -342,7 +342,6 @@ function MessageCheck(message, sqlguild, sqlcon) {
 								break;
 						}
 					}
-					console.log(cmd)
 					switch (cmd) {
 						case "heartofcorruption":
 						case "devserver":
@@ -590,13 +589,13 @@ function Help(message, rows) {
 
 			switch (props.config.type) {
 				case "info":
-					InfoCMDs += `**${gPrefix}${f.replace('.js', '')}** - ${props.config.info}\n`
+					InfoCMDs += `**${gPrefix}${props.config.name}** - ${props.config.info}\n`
 					break;
 				case "mod":
-					ModCMDs += `**${gPrefix}${f.replace('.js', '')}** - ${props.config.info}\n`
+					ModCMDs += `**${gPrefix}${props.config.name}** - ${props.config.info}\n`
 					break;
 				case "general":
-					GeneralCMDs += `**${gPrefix}${f.replace('.js', '')}** - ${props.config.info}\n`
+					GeneralCMDs += `**${gPrefix}${props.config.name}** - ${props.config.info}\n`
 					break;
 				case "test":
 					break;

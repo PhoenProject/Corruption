@@ -13,9 +13,9 @@ module.exports.run = async (client, message, args, sqlcon) => {
             let desc = "Unmutes a muted user."
             let Member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
             let mRole = message.guild.roles.find(role => role.name === "Muted")
-            if (Member === null)
+            if (Member == null || Member == undefined)
                 return message.channel.send("That member could not be found!");
-            else if (Member.user.bot)
+            else if (Member.bot)
                 return message.channel.send("You can not unmute bots!");
             else if (Member.id === message.author.id)
                 return message.channel.send("You can not unmute yourself!");

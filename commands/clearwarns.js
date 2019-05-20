@@ -35,7 +35,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
     let hArgs = "<user>"
     let wMember = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) bot.console(err) 
+        if (err) utils.ConsoleMessage(err, client) 
         if (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.find(role => role.id === rows[0].AdminRole)) {
             if (!message.member.hasPermission(perm) || !wMember || args[0] === "help") return utils.Embed(message, cmdused, perm, desc, hArgs, sqlcon);
         }

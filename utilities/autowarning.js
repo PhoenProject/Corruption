@@ -52,7 +52,7 @@ module.exports.massping = (client, message, sqlcon) => {
 }
 async function AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message) {
     sqlcon.query(`SELECT * FROM warnsnew WHERE UserID = '${AWUser.id}' AND GuildID = '${message.guild.id}'`, (err, WarnCount) => {
-        if (err) bot.console(err)
+        if (err) utils.ConsoleMessage(err, client)
         if (WarnCount.length < 1) {
             sqlcon.query(`INSERT INTO warnsnew (GuildID, UserID, Count, Reason, Timestamp, Issuer, ChannelID, MessageID) VALUES
 			('${message.guild.id}', '${AWUser.id}', '1', '${AutoWarnReason}', '${issueTime}', '484821107954810891', '${message.channel.id}', '${message.id}')`)

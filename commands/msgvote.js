@@ -1,14 +1,13 @@
 const Discord = require("discord.js");
+const utils = require('../utilities/utils.js');
 const bot = require('../CorruptionBot.js')
 
 module.exports.run = async (client, message, args, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) bot.console(err) 
-        console.log(args[0])
+        if (err) utils.ConsoleMessage(err, client)
         if (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.find(role => role.id === rows[0].AdminEole)) {
             if (args[0] === "enable") {
                 sqlcon.query(`SELECT * FROM chanprefs WHERE ChannelID = '${message.channel.id}'`, (err, status) => {
-                    console.log(status[0].MsgVote)
                     if (status[0].MsgVote === "false") {
                         sqlcon.query(`UPDATE chanprefs SET MsgVote = 'true' WHERE ChannelID = '${message.channel.id}'`)
                         message.channel.send("Message voting has been enabled in this channel")

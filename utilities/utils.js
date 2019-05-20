@@ -1,23 +1,11 @@
 const Discord = require("discord.js");
-const config = require("../config.json");
-const base = require('./basebot.js');
-const dscp = require('./dscpcmds.js');
-const autow = require('./autowarning.js');
-const mbot = require('./modbot.js');
-const stats = require('./stattrack.js');
 const moment = require("moment");
-const shell = require('shelljs');
-const fs = require("fs");
-const mysql = require("mysql");
-const { exec } = require("child_process");
-const { inspect } = require('util');
-const SteamAPI = require('steamapi');
 const bot = require('../CorruptionBot.js')
 
 module.exports.Embed = (message, cmdused, perm, desc, hArgs, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
         if (err) bot.console(err)
-            let Bot = message.guild.members.get(member => member.id === client.user.id)
+        let Bot = message.guild.members.get(member => member.id === client.user.id)
         const embed = new Discord.RichEmbed()
             .setAuthor(`Corruption Bot help module`)
             .setColor(message.member.displayHexColor)
@@ -32,4 +20,14 @@ module.exports.Embed = (message, cmdused, perm, desc, hArgs, sqlcon) => {
 module.exports.CatchError = (message, error, cmdused) => {
     message.channel.send(`Sorry, but i was unable to execute that command due to an error! ${error}`)
     console.log(`[${moment().format('YYYY MM DD HH:ss')}] ${message.author} attempted to use ${cmdused} but errored due to ${error}`)
+}
+module.exports.ConsoleMessage = (error, client) => {
+    const errorembed = new Discord.RichEmbed()
+        .setAuthor('Corruption dev console', 'https://cdn.discordapp.com/avatars/484821107954810891/a997ad75d4d7e7a8e3a57d28f68effff.png?size=1024')
+        .setColor('#e8dd6a')
+        .setTimestamp()
+        .setFooter("Corruption dev console")
+        .addField("Console Message", message);
+
+    client.user.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === "579299257815793674").send(errorembed)
 }

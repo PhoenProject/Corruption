@@ -252,7 +252,7 @@ async function Actionlog(client, message) {
             }
         }).catch(Error => {
             message.channel.bulkDelete(1)
-            console.log(Error)
+            utils.ConsoleMessage(Error, client)
             message.reply("The form has timed out!")
         });
     }
@@ -319,7 +319,7 @@ async function Hacker(client, message, sqlcon) {
                             message.reply(`Hacker logging canceled`)
                         }
                     }).catch(Error => {
-                        console.log(Error)
+                        utils.ConsoleMessage(Error, client)
                         message.channel.bulkDelete(5)
                         message.reply("The form has timed out!")
                     });
@@ -368,7 +368,6 @@ async function Watch(client, message, sqlcon) {
                             if (Haddnotes.first().toString().toLowerCase() != "none") wantedembed.addField(`Additional Notes`, Haddnotes.first().content)
 
                             let SQLreason = Haddnotes.first().toString().replace(/'/g, '~')
-                            console.log(SQLreason)
                             sqlcon.query(`INSERT INTO watchlist (SteamID, Reason, Hacker, Watch) VALUES ('${Hsteamid.first().toString()}', '${SQLreason}', '0', '1')`)
 
                             message.guild.channels.find(channel => channel.id === "440887611406680096").send(wantedembed)

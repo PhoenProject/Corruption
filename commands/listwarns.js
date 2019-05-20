@@ -1,12 +1,13 @@
 const Discord = require("discord.js");
+const utils = require('../utilities/utils.js');
 const bot = require('../CorruptionBot.js')
 
 module.exports.run = async (client, message, args, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) bot.console(err)
+        if (err) utils.ConsoleMessage(err, client)
         let wUser = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0]) || message.author.id
         sqlcon.query(`SELECT * FROM warnsnew WHERE UserID = '${wUser.id}' AND GuildID = '${message.guild.id}'`, (err, warnings) => {
-            if (err) bot.console(err)
+            if (err) utils.ConsoleMessage(err, client)
 
             if (warnings.length < 1) {
                 message.channel.send("That user has no warns!")

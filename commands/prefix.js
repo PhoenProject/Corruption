@@ -1,8 +1,9 @@
-const bot = require('../CorruptionBot.js')
+const bot = require('../CorruptionBot.js');
+const utils = require('../utilities/utils.js');
 
 module.exports.run = async (client, message, args, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) bot.console(err)
+        if (err) utils.ConsoleMessage(err, client)
         if (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.find(role => role.id === rows[0].Adminrole)) {
             if (args[0] === undefined) return message.channel.send("Please specify a new prefix!");
             sqlcon.query(`UPDATE guildprefs SET Prefix = '${args[0]}' WHERE GuildID = '${message.guild.id}'`)

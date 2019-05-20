@@ -16,7 +16,7 @@ var sqlcon = mysql.createConnection({
     charset: 'utf8mb4'
 });
 sqlcon.connect(err => {
-    if (err) bot.console(err)
+    if (err) utils.ConsoleMessage(err, client)
     console.log("Connected To Database");
 })
 sqlcon.on('error', error => {
@@ -28,7 +28,7 @@ sqlcon.on('error', error => {
             database: config.SBdatabase,
             charset: 'utf8mb4'
         });
-    } else bot.Console(error)
+    } else console.log(error)
 })
 
 module.exports.main = (client, message) => {

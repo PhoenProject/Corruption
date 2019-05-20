@@ -680,18 +680,4 @@ function Update(message) {
 	}
 }
 
-function ConsoleMessage(error) {
-	let client = bot.client
-	const errorembed = new Discord.RichEmbed()
-		.setAuthor('Corruption dev console', 'https://cdn.discordapp.com/avatars/484821107954810891/a997ad75d4d7e7a8e3a57d28f68effff.png?size=1024')
-		.setColor('#e8dd6a')
-		.setTimestamp()
-		.setFooter("Corruption dev console")
-		.addField("Console Message", message);
-
-	client.user.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === "579299257815793674").send(errorembed)
-}
-
-
-
 client.login(config.token);

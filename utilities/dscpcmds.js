@@ -1,4 +1,5 @@
 const Discord = require("discord.js");
+const utils = require('../utilities/utils.js');
 const config = require("../config.json");
 const moment = require("moment");
 const fs = require("fs");
@@ -54,7 +55,7 @@ module.exports.offduty = (client, message, MsgContent) => {
                         message.channel.send("Form canceled!")
                     }
                 }).catch(Error => {
-                    console.log(Error)
+                    utils.ConsoleMessage(Error, client)
                     message.channel.bulkDelete(3)
                     message.channel.send("The form has timed out!")
                 });
@@ -65,7 +66,7 @@ module.exports.offduty = (client, message, MsgContent) => {
             }
         }).catch(Error => {
             message.channel.bulkDelete(2)
-            console.log(Error)
+            utils.ConsoleMessage(Error, client)
             message.channel.send("The form has timed out!")
         });
     }
@@ -98,7 +99,7 @@ module.exports.nsfw = (client, message, MsgContent) => {
                 message.channel.bulkDelete(2)
             }
         }).catch(Error => {
-            console.log(Error)
+            utils.ConsoleMessage(Error, client)
             message.channel.bulkDelete(1)
         });
 

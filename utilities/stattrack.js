@@ -5,6 +5,7 @@ const moment = require("moment");
 const fetch = require('node-fetch');
 const SteamAPI = require('steamapi');
 const config = require("../config.json");
+const bot = require('../CorruptionBot.js')
 const steam = new SteamAPI(config.SteamAIPKey);
 
 var sqlcon = mysql.createConnection({
@@ -21,13 +22,13 @@ sqlcon.connect(err => {
 sqlcon.on('error', error => {
     if (error.code === 'PROTOCOL_CONNECTION_LOST') {
         sqlcon = mysql.createConnection({
-            host: "127.0.0.1",
-            user: "root",
-            password: "Jz3Rain",
-            database: "corruptionbot",
+            host: config.SBhost,
+            user: config.SBuser,
+            password: config.SBpassword,
+            database: config.SBdatabase,
             charset: 'utf8mb4'
         });
-    } else utils.Console(error)
+    } else bot.Console(error)
 })
 
 module.exports.main = (client, message) => {

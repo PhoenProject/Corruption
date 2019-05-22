@@ -41,9 +41,9 @@ module.exports.main = (client, message) => {
             }
             else if (results.size = 1) {
                 try {
-                    let name = message.member.nickname.replace(/'/g, "~~")
-                    if (message.member.nickname == null) name = message.author.username.replace(/'/g, "~~")
-                    sqlcon.query(`UPDATE playerstats SET Name = '${name}' WHERE DiscordID = '${message.author.id}'`)
+                    let name = message.member.nickname
+                    if (message.member.nickname == null) name = message.author.username
+                    sqlcon.query(`UPDATE playerstats SET Name = '${name.replace(/'/g, "~~")}' WHERE DiscordID = '${message.author.id}'`)
                     StatMessage(sqlcon, message, client, results)
                 }
                 catch (err) {

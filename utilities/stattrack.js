@@ -125,7 +125,7 @@ async function StatMessage(sqlcon, message, client, results) {
         setTimeout(function () {
             let StatEmbed = new Discord.RichEmbed()
                 .setDescription(`**Steam:** [${results[0].SteamName}](https://steamcommunity.com/profiles/${results[0].SteamID}) (${results[0].SteamID})`
-                    + `\n**Discord:** ${results[0].Name.replcae(/~~/g, "'")} (${results[0].DiscordID})`)
+                    + `\n**Discord:** ${results[0].Name.replace(/~~/g, "'")} (${results[0].DiscordID})`)
                 .addField("Playtime", parseInt(results[0].PlayTime, 0) + " minutes"
                     + "\n(" + (parseFloat(results[0].PlayTime, 0) / 60).toFixed(2) + " hours)")
                 .addField("Deaths", `${results[0].Deaths}`

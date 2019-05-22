@@ -79,7 +79,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
 }
 module.exports.config = {
   name: "mute",
-  aliases: ["stab", "gag", "bin"],
+  aliases: ["stab", "gag", "bin", "recycle"],
   info: "Blocks a user from sending messages, and from adding reactions",
   type: "mod"
 }

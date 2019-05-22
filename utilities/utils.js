@@ -27,7 +27,7 @@ module.exports.ConsoleMessage = (error, client) => {
         .setColor('#e8dd6a')
         .setTimestamp()
         .setFooter("Corruption dev console")
-        .addField("Console Message", message);
+        .addField("Console Message", error);
 
     client.user.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === "579299257815793674").send(errorembed)
 }

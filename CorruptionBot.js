@@ -566,7 +566,7 @@ function Reloadcommand(message) {
 				.setTimestamp()
 				.addField("Loaded commands:", `${modulelist}`)
 			let cmessage = `The bot commands have been reloaded.\n${modulelist}`;
-			ConsoleMessage(error)
+			utils.ConsoleMessage(error)
 
 			message.channel.send(reload)
 		});

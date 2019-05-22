@@ -171,6 +171,8 @@ module.exports.run = async (client, message, args, sqlcon) => {
       else {
         if (member.id === client.user.id)
           JokeWarning(client, message, member)
+        else if (Member == null || Member == undefined)
+          return message.channel.send("That member could not be found!");
         else if (member.user.bot)
           return message.channel.send("You can not warn bots!");
         else if (member.id === message.author.id)

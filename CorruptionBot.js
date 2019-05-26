@@ -174,17 +174,15 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 client.on("messageDelete", async message => {
 	if (!message.guild) return
 	else {
-		let logs = await message.guild.fetchAuditLogs({ type: 72 }).catch(error => {
-			let cmessage = error;
-			ConsoleMessage(error)
-		});
+		let logs = await message.guild.fetchAuditLogs({ type: 72 }).catch(error => { ConsoleMessage(error) });
 		let entry = logs.entries.first();
 
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
 			if (err) ConsoleMessage(error)
 			if (message.mentions.members.first() != undefined && message.mentions.users.first().id != message.author.id
-				&& !message.mentions.users.first().bot && entry.createdTimestamp < (Date.now() - 5000))
-				return message.channel.send(`Damn son, ${message.author} ghost pinged ${message.mentions.members.first()}`)
+				&& !message.mentions.users.first().bot && entry.createdTimestamp < (Date.now() - 5000)) {
+				message.channel.send(`Damn son, ${message.author} ghost pinged ${message.mentions.members.first()}`)
+			}
 
 			MessageDelete(message, entry, rows)
 		})
@@ -490,7 +488,7 @@ function MessageDelete(message, entry, rows) {
 	if (mlogchannel != null) {
 		if (message.guild == null || message.author.bot) return;
 
-		if(message.member == null || message.member.displayHexColor == null) color = '#6fa1f2'
+		if (message.member == null || message.member.displayHexColor == null) color = '#6fa1f2'
 		else color = message.member.displayHexColor
 		const sInfo = new Discord.RichEmbed()
 			.setAuthor(`${message.author.tag} - Deleted message`, message.author.avatarURL)

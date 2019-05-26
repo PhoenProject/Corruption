@@ -23,6 +23,16 @@ module.exports.CommandChans = (client, message, sqlcon) => {
         message.channel.send(`User has been offline banned`)
         message.delete(10000)
     }
+    if (message.content.startsWith("?rbanip")) {
+
+        let bmessage = message.content.replace('?r', '+')
+        message.guild.channels.find(channel => channel.id === `473400727717281793`).send(bmessage);
+        message.guild.channels.find(channel => channel.id === `473403553013301248`).send(bmessage);
+        message.guild.channels.find(channel => channel.id === `519867312090644490`).send(bmessage);
+
+        message.channel.send(`User has been offline banned`)
+        message.delete(10000)
+    }
     else if (message.content.startsWith("?runban")) {
         if ((message.member.roles.has("511249444855873547") || message.member.roles.has("431866226982256642") || message.member.hasPermission("ADMINISTRATOR"))) {
             Unban(message)

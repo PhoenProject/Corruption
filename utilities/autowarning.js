@@ -14,7 +14,7 @@ module.exports.globalfilter = (client, message, sqlcon) => {
                 let AWMember = message.member
                 let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
                 AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
-                message.delete()
+                message.delete().catch(error => {console.log(error)})
             }
         });
     })
@@ -28,7 +28,7 @@ module.exports.filter = (client, message, sqlcon) => {
                 let AWMember = message.member
                 let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
                 AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
-                message.delete()
+                message.delete().catch(error => {console.log(error)})
             }
         });
     })

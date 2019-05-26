@@ -6,10 +6,11 @@ module.exports.Embed = (message, cmdused, perm, desc, hArgs, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
         if (err) bot.console(err)
         let Bot = message.guild.members.get(member => member.id === client.user.id)
+        if(message.member == null || message.member.displayHexColor == null) color = '#6fa1f2'
+		else color = message.member.displayHexColor
         const embed = new Discord.RichEmbed()
             .setAuthor(`Corruption Bot help module`)
-            .setColor(message.member.displayHexColor)
-            .setColor(Bot.displayHexColor)
+            .setColor(color)
             .setFooter(`Do ${rows[0].Prefix}help for more information`)
             .setTimestamp()
             .setDescription(`${rows[0].Prefix}${cmdused} ${hArgs}`)

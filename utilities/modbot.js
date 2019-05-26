@@ -21,7 +21,7 @@ module.exports.CommandChans = (client, message, sqlcon) => {
         message.guild.channels.find(channel => channel.id === `519867312090644490`).send(bmessage);
 
         message.channel.send(`User has been offline banned`)
-        message.delete(10000)
+        message.delete(10000).catch(error => {console.log(error)})
     }
     if (message.content.startsWith("?rbanip")) {
 
@@ -31,7 +31,7 @@ module.exports.CommandChans = (client, message, sqlcon) => {
         message.guild.channels.find(channel => channel.id === `519867312090644490`).send(bmessage);
 
         message.channel.send(`User has been offline banned`)
-        message.delete(10000)
+        message.delete(10000).catch(error => {console.log(error)})
     }
     else if (message.content.startsWith("?runban")) {
         if ((message.member.roles.has("511249444855873547") || message.member.roles.has("431866226982256642") || message.member.hasPermission("ADMINISTRATOR"))) {
@@ -87,7 +87,7 @@ module.exports.CommandChans = (client, message, sqlcon) => {
                 message.reply("Sorry, but i can not find you in the database!")
             }
             else {
-                message.delete(250)
+                message.delete(250).catch(error => {console.log(error)})
                 message.author.send("```ini"
                     + `\n[This week]`
                     + `\n${staff[0].PlayTime} minutes \n(${(parseInt(staff[0].PlayTime) / 60).toFixed(2)} hours)`
@@ -98,7 +98,7 @@ module.exports.CommandChans = (client, message, sqlcon) => {
         })
     }
     else if (message.content.startsWith("?adminontime") && (message.member.roles.has("541986233807536129") || message.member.hasPermission("ADMINISTRATOR"))) {
-        message.delete(250)
+        message.delete(250).catch(error => {console.log(error)})
         sqlcon.query(`SELECT * FROM stafflist ORDER BY PlayTime DESC`, (err, staff) => {
             if (staff == undefined) message.channel.send(err)
             else {
@@ -160,7 +160,7 @@ async function Unban(message) {
         message.guild.channels.find(channel => channel.id === `473400727717281793`).send(bmessage);
         message.guild.channels.find(channel => channel.id === `473403553013301248`).send(bmessage);
         message.guild.channels.find(channel => channel.id === `519867312090644490`).send(bmessage);
-        message.delete(250)
+        message.delete(250).catch(error => {console.log(error)})
     }
     else if (args[1] === undefined) {
         message.channel.send(`Please specify a SteamID/IP to unban`)
@@ -211,57 +211,57 @@ async function Actionlog(client, message) {
                                                     if (AddNotes.toLowerCase() != "none") wantedember.addField(`Additional notes`, AddNotes)
 
                                                     message.guild.channels.find(channel => channel.id === "513154685117661205").send(wantedember)
-                                                    message.channel.bulkDelete(10)
+                                                    message.channel.bulkDelete(10).catch(error => {console.log(error)})
                                                     message.reply("Your log has been added to <#513154685117661205>")
                                                 }
                                                 else if (addnotes.first().toString().toLowerCase() === "cancel") {
-                                                    message.channel.bulkDelete(10)
+                                                    message.channel.bulkDelete(10).catch(error => {console.log(error)})
                                                     message.reply("Action log canceled")
                                                 }
                                             }).catch(Error => {
                                                 message.guild.channels.find(channel => channel.id === "513154685117661205").send(wantedember)
-                                                message.channel.bulkDelete(9)
+                                                message.channel.bulkDelete(9).catch(error => {console.log(error)})
                                                 message.reply("Your log has been added to <#513154685117661205>")
                                             });
                                         }
                                         else if (action.first().toString().toLowerCase() === "cancel") {
-                                            message.channel.bulkDelete(8)
+                                            message.channel.bulkDelete(8).catch(error => {console.log(error)})
                                             message.reply("Action log canceled")
                                         }
                                     }).catch(Error => {
-                                        message.channel.bulkDelete(7)
+                                        message.channel.bulkDelete(7).catch(error => {console.log(error)})
                                         message.reply("The form has timed out!")
                                     });
                                 }
                                 else if (offence.first().toString().toLowerCase() === "cancel") {
-                                    message.channel.bulkDelete(6)
+                                    message.channel.bulkDelete(6).catch(error => {console.log(error)})
                                     message.reply("Action log canceled")
                                 }
                             }).catch(Error => {
-                                message.channel.bulkDelete(5)
+                                message.channel.bulkDelete(5).catch(error => {console.log(error)})
                                 message.reply("The form has timed out!")
                             });
                         }
                         else {
-                            message.channel.bulkDelete(4)
+                            message.channel.bulkDelete(4).catch(error => {console.log(error)})
                             message.reply("Invalid SteamID")
                         }
                     }
                     else if (ID.first().toString().toLowerCase() === "cancel") {
-                        message.channel.bulkDelete(4)
+                        message.channel.bulkDelete(4).catch(error => {console.log(error)})
                         message.reply("Action log canceled")
                     }
                 }).catch(Error => {
-                    message.channel.bulkDelete(3)
+                    message.channel.bulkDelete(3).catch(error => {console.log(error)})
                     message.reply("The form has timed out!")
                 });
             }
             else if (Name.first().toString().toLowerCase() === "cancel") {
-                message.channel.bulkDelete(2)
+                message.channel.bulkDelete(2).catch(error => {console.log(error)})
                 message.reply("Action log canceled")
             }
         }).catch(Error => {
-            message.channel.bulkDelete(1)
+            message.channel.bulkDelete(1).catch(error => {console.log(error)})
             utils.ConsoleMessage(Error, client)
             message.reply("The form has timed out!")
         });
@@ -286,7 +286,7 @@ async function Actionlog(client, message) {
                 .setFooter(`Filed by DragonSCP staff`)
 
             message.guild.channels.find(channel => channel.id === "513154685117661205").send(wantedember)
-            message.channel.bulkDelete(1)
+            message.channel.bulkDelete(1).catch(error => {console.log(error)})
             message.reply("Your log has been added to <#513154685117661205>")
         }
     }
@@ -320,35 +320,35 @@ async function Hacker(client, message, sqlcon) {
 
                             wantedembed.addField("Warning!", "This user has been flagged as a possible hacker")
                             message.guild.channels.find(channel => channel.id === "440887611406680096").send(wantedembed)
-                            message.channel.bulkDelete(6)
+                            message.channel.bulkDelete(6).catch(error => {console.log(error)})
                             message.reply("Your log has been added to <#440887611406680096>")
 
                         }
                         else if (Haddnotes.first().toString().toLowerCase() === "cancel") {
-                            message.channel.bulkDelete(6)
+                            message.channel.bulkDelete(6).catch(error => {console.log(error)})
                             message.reply(`Hacker logging canceled`)
                         }
                     }).catch(Error => {
                         utils.ConsoleMessage(Error, client)
-                        message.channel.bulkDelete(5)
+                        message.channel.bulkDelete(5).catch(error => {console.log(error)})
                         message.reply("The form has timed out!")
                     });
                 }
                 else if (Hsteamid.first().toString().toLowerCase() === "cancel") {
-                    message.channel.bulkDelete(4)
+                    message.channel.bulkDelete(4).catch(error => {console.log(error)})
                     message.reply(`Hacker logging canceled`)
                 }
             }).catch(Error => {
-                message.channel.bulkDelete(3)
+                message.channel.bulkDelete(3).catch(error => {console.log(error)})
                 message.reply("The form has timed out!")
             });
         }
         else if (Hname.first().toString().toLowerCase() === "cancel") {
-            message.channel.bulkDelete(2)
+            message.channel.bulkDelete(2).catch(error => {console.log(error)})
             message.reply(`Hacker logging canceled`)
         }
     }).catch(Error => {
-        message.channel.bulkDelete(1)
+        message.channel.bulkDelete(1).catch(error => {console.log(error)})
         message.reply("The form has timed out!")
     });
 }
@@ -381,34 +381,34 @@ async function Watch(client, message, sqlcon) {
                             sqlcon.query(`INSERT INTO watchlist (SteamID, Reason, Hacker, Watch) VALUES ('${Hsteamid.first().toString()}', '${SQLreason}', '0', '1')`)
 
                             message.guild.channels.find(channel => channel.id === "440887611406680096").send(wantedembed)
-                            message.channel.bulkDelete(6)
+                            message.channel.bulkDelete(6).catch(error => {console.log(error)})
                             message.reply("Your log has been added to <#440887611406680096>")
 
                         }
                         else if (Haddnotes.first().toString().toLowerCase() === "cancel") {
-                            message.channel.bulkDelete(6)
+                            message.channel.bulkDelete(6).catch(error => {console.log(error)})
                             message.reply(`Suspicious player logging canceled`)
                         }
                     }).catch(Error => {
-                        message.channel.bulkDelete(5)
+                        message.channel.bulkDelete(5).catch(error => {console.log(error)})
                         message.reply(Error.toString())
                     });
                 }
                 else if (Hsteamid.first().toString().toLowerCase() === "cancel") {
-                    message.channel.bulkDelete(4)
+                    message.channel.bulkDelete(4).catch(error => {console.log(error)})
                     message.reply(`Suspicious player logging canceled`)
                 }
             }).catch(Error => {
-                message.channel.bulkDelete(3)
+                message.channel.bulkDelete(3).catch(error => {console.log(error)})
                 message.reply(Error.toString())
             });
         }
         else if (Hname.first().toString().toLowerCase() === "cancel") {
-            message.channel.bulkDelete(2)
+            message.channel.bulkDelete(2).catch(error => {console.log(error)})
             message.reply(`Suspicious player logging canceled`)
         }
     }).catch(Error => {
-        message.channel.bulkDelete(1)
+        message.channel.bulkDelete(1).catch(error => {console.log(error)})
         message.reply(Error.toString())
     });
 }

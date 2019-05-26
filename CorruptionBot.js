@@ -488,11 +488,13 @@ function AntiRaid(member) {
 function MessageDelete(message, entry, rows) {
 	let mlogchannel = message.guild.channels.find((channel => channel.id === rows[0].MsgLogChan));
 	if (mlogchannel != null) {
-		if (message.guild = null) return;
-		else if (message.author.bot === true) return;
+		if (message.guild == null || message.author.bot) return;
+
+		if(message.member == null || message.member.displayHexColor == null) color = '#6fa1f2'
+		else color = message.member.displayHexColor
 		const sInfo = new Discord.RichEmbed()
 			.setAuthor(`${message.author.tag} - Deleted message`, message.author.avatarURL)
-			.setColor(message.member.displayHexColor)
+			.setColor(color)
 			.setTimestamp()
 			.addField("Channel", message.channel, true);
 		if (entry.createdTimestamp > (Date.now() - 5000)) sInfo.addField("Deleted By", entry.executor, true)

@@ -702,12 +702,12 @@ function Setup(message, prefix) {
 			.setDescription(`A short and quick guide to help with setting up the corruption bot on your discord server`)
 			.addField(`Logging`, `Corruption (like most discord bots) has message and member logging, allowing you to see deleted and edited messages,`
 				+ ` as well as seeing members who join and/or leave the server.`
-				+ `\nTo set up logging for the user, use the ${prefix[0].Prefix}logging command.`)
+				+ '\nTo set up logging for the user, use the `' + prefix[0].Prefix + 'logging` command.')
 			.addField(`Moderator and Admin roles`, `Corruption has some commands which are not suitable for lower members of staff.`
 				+ `\nFor this reason, you can specify moderator and admin roles for the bot to look for when running specific commands.`
-				+ `\nTo set these roles up, you can use the ${prefix[0].Prefix}roles command.`)
-			.addField(`Bot prefix`, 'By default, the prefix for corruption is `?`'
-				+ `, However you are able to change this prefix with the use of the ${prefix[0].Prefix}prefix command.`)
+				+ '\nTo set these roles up, you can use the `' + prefix[0].Prefix + 'roles` command.')
+			.addField(`Bot prefix`, 'By default, the prefix for corruption is `?`,'
+				+ ' However you are able to change this prefix with the use of the `' + prefix[0].Prefix + '`prefix command.')
 			.addField(`Bot permissions`, `The bot requires some permissions on your discord server in order to carry out it's duties.`
 				+ `\nThe following is the list of permissions that it will require`
 				+ `(If you got the invite link from a legitimate source, it should have an automatic role with these permissions)`

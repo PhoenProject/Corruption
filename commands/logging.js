@@ -58,7 +58,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
                     }
                 }
             }
-            else if (args[0] === "logchannel") {
+            else if (args[0] === "channel") {
                 if (args[1] === "messages") {
                     if (!message.mentions.channels.first()) message.channel.send("Please mention a channel!")
                     else {
@@ -77,15 +77,13 @@ module.exports.run = async (client, message, args, sqlcon) => {
                 }
             }
             else {
-                if (dStatus = true) status = "Enabled"
-                else if (dStatus = false) status = "Disabled"
                 let msgvoteemd = new Discord.RichEmbed()
                     .setAuthor("Corruption bot logging", client.user.avatarURL)
                     .setDescription("Changes the logging settings for this server")
                     .addField("**__Commands:__**",
                         "\n**messages** <enable/disable> - Toggles the message logging for this server"
                         + "\n**members** <enable/disable> - Toggles the member logging for this server"
-                        + "\n**logchannel** <messages/members> - Specifies the channel you wish the logs to go into")
+                        + "\n**channel** <messages/members> - Specifies the channel you wish the logs to go into")
                     .setFooter(`Do ${rows[0].Prefix}help for help with commands`)
                     .setTimestamp()
                     .setColor(message.member.displayHexColor)

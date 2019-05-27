@@ -655,11 +655,15 @@ function Restart(message) {
 					.clean("-f -n")
 					.stash()
 					//.silent(true)
-					.pull(remote, "master", {"--git-dir=":config.GitDir})
+					.pull(remote, "master", { "--git-dir=": config.GitDir })
 					.exec(() => {
 						console.log('finished')
+						var spawn = exec(`pm2 start CorruptionBot.js --name ${config.ProcessName}`, {
+							detached: true
+						});
 
 						setTimeout(function () {
+
 							process.exit()
 						}, 5000)
 					})

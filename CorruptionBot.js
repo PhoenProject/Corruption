@@ -695,7 +695,7 @@ function Update(message) {
 	}
 }
 function Setup(message, prefix) {
-	if (message.author.hasPermission("MANAGE_SERVER")) {
+	if (message.member.hasPermission("MANAGE_SERVER")) {
 		const SetupGuide = new Discord.RichEmbed()
 			.setAuthor(`Corruption bot set-up guide`, client.user.avatarURL)
 			.setColor(message.member.displayHexColor)

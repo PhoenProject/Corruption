@@ -512,7 +512,8 @@ function MessageDelete(message, entry, rows) {
 			.setTimestamp()
 			.addField("Channel", message.channel, true);
 		console.log(entry)
-		if (entry !== "undefined") {
+		if (entry != undefined) {
+			console.log("entry")
 			if (entry.createdTimestamp > (Date.now() - 5000)) sInfo.addField("Deleted By", entry.executor, true)
 		}
 		if (message.attachments.first() !== undefined) {

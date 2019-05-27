@@ -655,7 +655,7 @@ function Restart(message) {
 					.clean("-f -n")
 					.stash()
 					//.silent(true)
-					.pull(remote, "master")
+					.pull(remote, "master", {"--git-dir=":config.GitDir})
 					.exec(() => {
 						console.log('finished')
 

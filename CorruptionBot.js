@@ -178,7 +178,7 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 		}
 	})
 });
-client.on("gui")
+//client.on("gui")
 // #endregion
 
 // #region Message events

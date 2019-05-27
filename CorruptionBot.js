@@ -658,7 +658,7 @@ function Restart(message) {
 					.pull(remote, "master", { "--git-dir=": config.GitDir })
 					.exec(() => {
 						console.log('finished')
-						var spawn = exec(`pm2 start CorruptionBot.js --name ${config.ProcessName}`, {
+						var spawn = exec(`pm2 restart ${config.ProcessName}`, {
 							detached: true
 						});
 

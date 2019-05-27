@@ -431,7 +431,7 @@ function AddGuildMember(member, mlogchannel) {
 		.addField("Creation Date:", `${cdate.format("MMMM Do YYYY HH:mm")}\n(${moment(cdate).fromNow()})`, true);
 	let ageS = moment(cdate).fromNow(true)
 	let ageA = ageS.split(" ");
-	if (ageS.includes("seconds") || ageA[1] === "minute" || ageA[1] === "minutes" || ageA[1] === "hour" ||  ageA[1] === "hours" || ageA[1] === "day" || ageA[1] === "days") {
+	if (ageS.includes("seconds") || ageA[1] === "minute" || ageA[1] === "minutes" || ageA[1] === "hour" || ageA[1] === "hours" || ageA[1] === "day" || ageA[1] === "days") {
 		if (!member.guild.roles.find(role => role.name === "Anti-Alt")) {
 			member.guild.createRole({
 				name: "Anti-Alt",
@@ -511,7 +511,9 @@ function MessageDelete(message, entry, rows) {
 			.setColor(color)
 			.setTimestamp()
 			.addField("Channel", message.channel, true);
-		if (entry.createdTimestamp > (Date.now() - 5000)) sInfo.addField("Deleted By", entry.executor, true)
+		if (entry != undefined) {
+			if (entry.createdTimestamp > (Date.now() - 5000)) sInfo.addField("Deleted By", entry.executor, true)
+		}
 		if (message.attachments.first() !== undefined) {
 			let aName = message.attachments.first().filename
 			sInfo.addField("Attatchment", aName, true)

@@ -711,6 +711,11 @@ function Setup(message, prefix) {
 				+ `\nThe following is the list of permissions that it will require`
 				+ `(If you got the invite link from a legitimate source, it should have an automatic role with these permissions)`
 				+ `\nView audit log\nManage roles\nManage channels\nKick members\nBan members\nChange nickname`)
+			.addField(`Filter`, `ATM the filter is a WIP. There *is* a global filter (Blocks all variations of the N-word), but a server specific filter is not currently available.`)
+			.addField(`Warns`, `ATM the warning system is being reworked. Currently, there is no way to remove a single warn from a user.`
+				+ `\nIf it is 100% needed, please contact the bot developer, as they can manually remove the warn from the database`)
+			.addField(`Contactin the developer`, 'If you need to contact the bot developer, then you can either join the discord server (Link can be gotten via the `'
+				+ prefix[0].Prefix + 'devserver` command), or by using the `' + prefix[0].Prefix + 'contact` command')
 	}
 
 }

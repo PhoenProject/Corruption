@@ -4,7 +4,7 @@ const bot = require('../CorruptionBot.js')
 module.exports.run = async (client, message, args, sqlcon) => {
   sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
     if (err) utils.ConsoleMessage(err, client)
-    if (message.member.roles.find(role => role.id === rows[0].AdminRole) || message.member.hasPermission("ADMINISTRATOR")) {
+    if (message.member.hasPermission("BAN_MEMBERS") || message.member.hasPermission("ADMINISTRATOR")) {
       let cmdused = "ban"
       let perm = "BAN_MEMBERS"
       let desc = "Bans a user from the server."

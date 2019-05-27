@@ -661,11 +661,6 @@ function Restart(message) {
 						var spawn = exec(`pm2 restart ${config.ProcessName}`, {
 							detached: true
 						});
-
-						setTimeout(function () {
-
-							process.exit()
-						}, 5000)
 					})
 
 			}

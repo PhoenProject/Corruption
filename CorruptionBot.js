@@ -87,7 +87,7 @@ client.on("ready", () => {
 	GCount.forEach(element => {
 		UCount = UCount + element.memberCount
 	});
-	client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.LogChan).send("**CORRUPTION BOT ONLINE**")
+	client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send("**CORRUPTION BOT ONLINE**")
 	let cmessage = `Bot has started, with ${UCount} users, in ${client.guilds.size} guilds.`;
 	client.user.setPresence({ game: { name: "myself start up", type: "WATCHING" } })
 	setInterval(() => {
@@ -272,7 +272,7 @@ client.on("debug", debug => {
 			.setTimestamp()
 			.setFooter("Debug for Corruption Bot")
 			.addField("Debug", debug);
-		client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.LogChan).send(debugembed)
+		client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send(debugembed)
 	}
 	catch { console.log(debug) }
 });
@@ -284,7 +284,7 @@ client.on("warn", warn => {
 		.setTimestamp()
 		.setFooter("Warning for Corruption Bot")
 		.addField("Warning", warn);
-	client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.LogChan).send(warnembed)
+	client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send(warnembed)
 });
 client.on("error", error => {
 	let Bot = client.guilds.find(guild => guild.id === "446745542740148244").members.get(member => member.id === client.user.id)
@@ -294,8 +294,8 @@ client.on("error", error => {
 		.setTimestamp()
 		.setFooter("Error report for Corruption Bot")
 		.addField("Error", error.message);
-	if (!error.message.includes("ECONNRESET")) { client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.LogChan).send("<@&538368441929826304>") }
-	client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.LogChan).send(errorembed)
+	if (!error.message.includes("ECONNRESET")) { client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send("<@&538368441929826304>") }
+	client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send(errorembed)
 });
 client.on('disconnect', () => console.log('I just disconnected, making sure you know, I will reconnect now...'));
 client.on('reconnecting', () => console.log('I am reconnecting now!'));

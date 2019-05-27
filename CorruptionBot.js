@@ -144,7 +144,7 @@ client.on("guildMemberRemove", member => {
 				if (mlogchannel) {
 					let Bot = member.guild.members.get(member => member.id === client.user.id)
 					const sInfo = new Discord.RichEmbed()
-						.setTitle(`Member has left the guild`)
+						.setDescription(member + " **has left the guild**")
 						.setAuthor(`${member.displayName}`)
 						.setColor(member.displayHexColor)
 						.setFooter(`User ID: ${member.id}`)
@@ -178,7 +178,6 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 		}
 	})
 });
-//client.on("gui")
 // #endregion
 
 // #region Message events
@@ -420,9 +419,8 @@ function AddGuildMember(member, mlogchannel) {
 	var cdate = moment(new Date(User.createdAt));
 	let Guild = member.guild;
 	const sInfo = new Discord.RichEmbed()
-		.setTitle(`Member has joined the guild`)
-		.setAuthor(`${member.tag}`)
-		.setDescription(member)
+		.setAuthor(`${member.displayName}`)
+		.setDescription(member + " **has joined the guild**")
 		.setColor('#e450f4')
 		.setFooter(`User ID: ${member.id}`)
 		.setTimestamp()
@@ -511,9 +509,7 @@ function MessageDelete(message, entry, rows) {
 			.setColor(color)
 			.setTimestamp()
 			.addField("Channel", message.channel, true);
-		console.log(entry)
 		if (entry != undefined) {
-			console.log("entry")
 			if (entry.createdTimestamp > (Date.now() - 5000)) sInfo.addField("Deleted By", entry.executor, true)
 		}
 		if (message.attachments.first() !== undefined) {

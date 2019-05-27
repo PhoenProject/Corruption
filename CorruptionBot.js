@@ -698,6 +698,7 @@ function Setup(message, prefix) {
 	if (message.author.hasPermission("MANAGE_SERVER")) {
 		const SetupGuide = new Discord.RichEmbed()
 			.setAuthor(`Corruption bot set-up guide`, client.user.avatarURL)
+			.setColor(message.member.displayHexColor)
 			.setDescription(`A short and quick guide to help with setting up the corruption bot on your discord server`)
 			.addField(`Logging`, `Corruption (like most discord bots) has message and member logging, allowing you to see deleted and edited messages,`
 				+ ` as well as seeing members who join and/or leave the server.`
@@ -716,6 +717,7 @@ function Setup(message, prefix) {
 				+ `\nIf it is 100% needed, please contact the bot developer, as they can manually remove the warn from the database`)
 			.addField(`Contactin the developer`, 'If you need to contact the bot developer, then you can either join the discord server (Link can be gotten via the `'
 				+ prefix[0].Prefix + 'devserver` command), or by using the `' + prefix[0].Prefix + 'contact` command')
+		message.author.send(SetupGuide)
 	}
 
 }

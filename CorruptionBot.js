@@ -511,6 +511,7 @@ function MessageDelete(message, entry, rows) {
 			.setColor(color)
 			.setTimestamp()
 			.addField("Channel", message.channel, true);
+		console.log(entry)
 		if (entry !== "undefined") {
 			if (entry.createdTimestamp > (Date.now() - 5000)) sInfo.addField("Deleted By", entry.executor, true)
 		}

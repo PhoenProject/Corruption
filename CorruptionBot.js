@@ -125,7 +125,7 @@ client.on("guildMemberAdd", member => {
 			if (mlogchannel) { AddGuildMember(member, mlogchannel) }
 			else if (!mlogchannel) { }
 		}
-		else if (rows[0].AntiRaid === '1') { AntiRaid(member) }
+		if (rows[0].AntiRaid === '1') { AntiRaid(member) }
 	})
 });
 client.on("guildMemberRemove", member => {

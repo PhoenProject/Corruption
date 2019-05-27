@@ -16,10 +16,11 @@ const { inspect } = require('util');
 const SteamAPI = require('steamapi');
 const steam = new SteamAPI(config.SteamAIPKey);
 
+// #region Connection and data stuffs
+
 let modulelist = "";
 client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
-
 
 fs.readdir("./commands/", (err, files) => {
 	if (err) ConsoleMessage(error)
@@ -78,6 +79,7 @@ const play_act = [
 	`Tennis`,
 	`World domination`
 ];
+// #endregion
 
 client.on("ready", () => {
 	let GCount = client.guilds
@@ -103,6 +105,8 @@ client.on("ready", () => {
 
 
 });
+
+// #region Guild events
 client.on("guildCreate", guild => {
 	let cmessage = `New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`;
 
@@ -117,6 +121,9 @@ client.on("guildDelete", guild => {
 	let cmessage = `I have been removed from: ${guild.name} (id: ${guild.id})`;
 	ConsoleMessage(error)
 });
+// #endregion
+
+// #region Guild member events
 client.on("guildMemberAdd", member => {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
 		if (err) ConsoleMessage(error)
@@ -171,6 +178,10 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 		}
 	})
 });
+client.on("gui")
+// #endregion
+
+// #region Message events
 client.on("messageDelete", async message => {
 	if (!message.guild) return
 	else {
@@ -249,7 +260,9 @@ client.on("message", async message => {
 		});
 	}
 });
+// #endregion
 
+// #region Misc. bot events
 client.on("debug", debug => {
 	try {
 		let Bot = client.guilds.find(guild => guild.id === "446745542740148244").members.find(member => member.id === client.user.id)
@@ -286,6 +299,9 @@ client.on("error", error => {
 });
 client.on('disconnect', () => console.log('I just disconnected, making sure you know, I will reconnect now...'));
 client.on('reconnecting', () => console.log('I am reconnecting now!'));
+// #endregion
+
+// #region Functions
 
 //Handle Message
 function MessageCheck(message, sqlguild, sqlcon) {
@@ -403,10 +419,10 @@ function AddGuildMember(member, mlogchannel) {
 	let User = client.users.find(user => user.id === member.id);
 	var cdate = moment(new Date(User.createdAt));
 	let Guild = member.guild;
-	let Bot = member.guild.members.get(member => member.id === client.user.id)
 	const sInfo = new Discord.RichEmbed()
 		.setTitle(`Member has joined the guild`)
-		.setAuthor(`${member.displayName}`)
+		.setAuthor(`${member.tag}`)
+		.setDescription(member)
 		.setColor('#e450f4')
 		.setFooter(`User ID: ${member.id}`)
 		.setTimestamp()
@@ -415,7 +431,7 @@ function AddGuildMember(member, mlogchannel) {
 		.addField("Creation Date:", `${cdate.format("MMMM Do YYYY HH:mm")}\n(${moment(cdate).fromNow()})`, true);
 	let ageS = moment(cdate).fromNow(true)
 	let ageA = ageS.split(" ");
-	if (ageS.includes("seconds") || ageA[1] === "minutes" || ageA[1] === "hours" || ageA[1] === "days") {
+	if (ageS.includes("seconds") || ageA[1] === "minute" || ageA[1] === "minutes" || ageA[1] === "hour" ||  ageA[1] === "hours" || ageA[1] === "day" || ageA[1] === "days") {
 		if (!member.guild.roles.find(role => role.name === "Anti-Alt")) {
 			member.guild.createRole({
 				name: "Anti-Alt",
@@ -679,5 +695,7 @@ function Update(message) {
 		message.channel.send("Restart Aborted!");
 	}
 }
+
+// #endregion
 
 client.login(config.token);

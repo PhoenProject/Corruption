@@ -653,7 +653,7 @@ function Restart(message) {
 					.clean("-f -n")
 					.stash()
 					//.silent(true)
-					.pull(remote, "master", { "--git-dir=": config.GitDir })
+					.pull(remote, "master")
 					.exec(() => {
 						console.log('finished')
 						var spawn = exec(`pm2 restart ${config.ProcessName}`, {

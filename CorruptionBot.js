@@ -717,7 +717,9 @@ function Setup(message, prefix) {
 				+ `\nIf it is 100% needed, please contact the bot developer, as they can manually remove the warn from the database`)
 			.addField(`Contactin the developer`, 'If you need to contact the bot developer, then you can either join the discord server (Link can be gotten via the `'
 				+ prefix[0].Prefix + 'devserver` command), or by using the `' + prefix[0].Prefix + 'contact` command')
-		message.author.send(SetupGuide)
+
+		try {message.author.send(SetupGuide)}
+		catch (error) {message.channel.send(SetupGuide)}
 	}
 
 }

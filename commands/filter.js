@@ -20,18 +20,22 @@ module.exports.run = async (client, message, args, sqlcon) => {
         if (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.find(role => role.id === rows[0].AdminRole)) {
             if (args[0] == "global") {
                 if (args[1] == "enable") {
-                    if (rows[0].GlobalFilter == true) return message.channel.send("Global filter list is already enabled!")
-                    if (rows[0].GlobalFilter == false) { 
+                    if (rows[0].GlobalFilter == true) return message.channel.send("Global filter is already enabled!")
+                    else if (rows[0].GlobalFilter == false) { 
                         sqlcon.query(`UPDATE guildprefs SET GlobalFilter = '1' WHERE GuildID = '${message.guild.id}'`)
-                        message.channel.send("Global filter list has been enabled!") 
+                        message.channel.send("Global filter has been enabled!") 
                     }
                 }
-                if (args[1] == "disable") {
-                    if (rows[0].GlobalFilter == false) return message.channel.send("Global filter list is already disabled!")
-                    if (rows[0].GlobalFilter == true) { 
+                else if (args[1] == "disable") {
+                    if (rows[0].GlobalFilter == false) return message.channel.send("Global filter is already disabled!")
+                    else if (rows[0].GlobalFilter == true) { 
                         sqlcon.query(`UPDATE guildprefs SET GlobalFilter = '0' WHERE GuildID = '${message.guild.id}'`)
-                        message.channel.send("Global filter list has been disable!") 
+                        message.channel.send("Global filter has been disable!") 
                     }
+                }
+                else {
+                    if (rows[0].GlobalFilter == false) return message.channel.send("Global filter is currently disabled in this guild!")
+                    else if (rows[0].GlobalFilter == true) return message.channel.send("Global filter is currently enabled in this guild!")
                 }
 
             }

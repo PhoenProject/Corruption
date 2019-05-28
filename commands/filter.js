@@ -18,7 +18,7 @@ const bot = require('../CorruptionBot.js')
 module.exports.run = async (client, message, args, sqlcon) => {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
         if (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.find(role => role.id === rows[0].AdminRole)) {
-            if (gargs[0] == "global") {
+            if (args[0] == "global") {
                 if (args[1] == "enable") {
                     if (rows[0].GlobalFilter == true) return message.channel.send("Global filter list is already enabled!")
                     if (rows[0].GlobalFilter == false) { 

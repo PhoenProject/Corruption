@@ -27,8 +27,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
                 Member.removeRole(mRole).catch(error => { utils.CatchError(message, error, cmdused) });
                 setTimeout(function () {
                     let warnchannel = message.guild.channels.find((channel => channel.name === "mod-actions"));
-                    if (!warnchannel) { }
-                    else {
+                    if (warnchannel)  {
                         let muteEmbed = new Discord.RichEmbed()
                             .setAuthor(`Mute removed from ${Member.user.tag}`, Member.user.avatarURL)
                             .setColor(Member.displayHexColor)
@@ -39,8 +38,8 @@ module.exports.run = async (client, message, args, sqlcon) => {
                                 `Removed by ${message.author}`
                                 + `\n**Time of removal:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`);
                         warnchannel.send(muteEmbed)
-                        message.channel.send(`${Member} has been unmuted!`)
                     }
+                    message.channel.send(`${Member} has been unmuted!`)
                 }, 500);
             }
         }

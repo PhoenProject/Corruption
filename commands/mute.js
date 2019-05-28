@@ -52,10 +52,9 @@ module.exports.run = async (client, message, args, sqlcon) => {
         setTimeout(function () {
           if (Member.roles.has(mRole.id)) {
             let warnchannel = message.guild.channels.find((channel => channel.name === "mod-actions"));
-            if (!warnchannel) { }
-            else {
+            if (warnchannel) {
               let reason = args.slice(1).join(" ");
-              if(reason === "") reason = "No reason given!"
+              if (reason === "") reason = "No reason given!"
               let muteEmbed = new Discord.RichEmbed()
                 .setAuthor(`Mute given to ${Member.user.tag}`, Member.user.avatarURL)
                 .setColor(Member.displayHexColor)
@@ -68,8 +67,9 @@ module.exports.run = async (client, message, args, sqlcon) => {
                   + `\nReason: ${reason}`
                   + `\n[Link to mute](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
               warnchannel.send(muteEmbed)
-              message.channel.send(`${Member} has been given the Muted role!`)
+
             }
+            message.channel.send(`${Member} has been given the Muted role!`)
           }
         }, 500);
       }

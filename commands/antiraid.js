@@ -18,11 +18,17 @@ module.exports.run = async (client, message, args, sqlcon) => {
                     mentionable: false
                 }).catch(error => { return member.reply(`Sorry, i was unable to create the Anti-Raid role. ${error}`) });
                 let Guild = message.guild
-                let blarg = Guild.channels.filter(channel => channel.type === "text")
                 setTimeout(function () {
+                    let blarg = Guild.channels.filter(channel => channel.type === "text")
                     blarg.forEach(f => {
                         let mrole = message.guild.roles.find(role => role.name === "Anti-Raid").id
                         f.overwritePermissions(mrole, { SEND_MESSAGES: false, ADD_REACTIONS: false })
+                    });
+
+                    let blarg = Guild.channels.filter(channel => channel.type === "voice")
+                    blarg.forEach(f => {
+                        let mrole = message.guild.roles.find(role => role.name === "Anti-Raid").id
+                        f.overwritePermissions(mrole, { CONNECT: false })
                     });
                 }, 250)
             }

@@ -27,8 +27,8 @@ module.exports.run = async (client, message, args, sqlcon) => {
                     }
                 }
                 if (args[1] == "disable") {
-                    if (rows[0].GlobalFilter == true) return message.channel.send("Global filter list is already disabled!")
-                    if (rows[0].GlobalFilter == false) { 
+                    if (rows[0].GlobalFilter == false) return message.channel.send("Global filter list is already disabled!")
+                    if (rows[0].GlobalFilter == true) { 
                         sqlcon.query(`UPDATE guildprefs SET GlobalFilter = '0' WHERE GuildID = '${message.guild.id}'`)
                         message.channel.send("Global filter list has been disable!") 
                     }

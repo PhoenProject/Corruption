@@ -40,7 +40,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
 
             }
             else if(args[0] == "add"){
-                sqlcon.query(`INSERT INTO filter (GuildID, Word) VALUES (${message.guild.id}, ${args[1]})`)
+                sqlcon.query(`INSERT INTO filter (GuildID, Word) VALUES ('${message.guild.id}', '${args[1]}')`)
                 message.delete()
                 message.channel.send("Word has been added to the filter!")
             }

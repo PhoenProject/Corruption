@@ -32,8 +32,8 @@ module.exports.run = async (client, message, args, sqlcon) => {
     })
 }
 module.exports.config = {
-    name: "",
-    aliases: [""],
-    info: "",
-    type: "info, mod, general or test"
+    name: "filter",
+    aliases: ["filter"],
+    info: "Checks the message content to see if it contains a banned word",
+    type: "mod"
 }

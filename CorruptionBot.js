@@ -409,7 +409,7 @@ function CreateGuildPrefs(guild, sqlcon) {
 	let GuildName = strTest.replace(/'/g, '~');
 	console.log(GuildName);
 	sqlcon.query(`INSERT INTO guildprefs (GuildName, GuildID, MemLog, MemLogChan, MsgLog, MsgLogChan, Upvote, Downvote, ModRole, AdminRole, AntiRaid, Prefix, GlobalFilter)
-VALUES ('${GuildName}','${guild.id}','false','null','false','null','👍','👎','none','none','false','?', '1')`)
+VALUES ('${GuildName}','${guild.id}','false','null','false','null','null','👍','👎','none','none','false','?', '1')`)
 }
 function CreateChanPrefs(message, sqlcon) {
 	sqlcon.query(`INSERT INTO chanprefs (GuildID, ChannelID, MsgVote) VALUES ('${message.guild.id}', '${message.channel.id}', 'false')`)

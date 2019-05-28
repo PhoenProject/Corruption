@@ -146,30 +146,26 @@ async function HandleAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlco
     })
 }
 async function AutoWarnMessage(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message, WarnCount) {
-    let warnEmbed = new Discord.RichEmbed()
-        .setAuthor(`Warn issued for ${AWUser.tag}`, AWUser.avatarURL)
-        .setColor(AWMember.displayHexColor)
-        .setFooter(`UserID: ${AWUser.id}`)
-        .setTimestamp()
-        .setThumbnail(AWUser.avatarURL)
-        .addField(`Warning:`,
-            `Issued by: <@484821107954810891>`
-            + `\n**Issue Time:** ${issueTime}`
-            + `\nReason: ${AutoWarnReason}`
-            + `\n[Link to warning](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
-    let warnchannel = message.guild.channels.find((channel => channel.name === "mod-actions"));
-    if (!warnchannel) {
-        message.reply("I was unable to find a #mod-actions channel, so i will post it here.");
-        message.channel.send(warnEmbed);
+    sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
+        let warnEmbed = new Discord.RichEmbed()
+            .setAuthor(`Warn issued for ${AWUser.tag}`, AWUser.avatarURL)
+            .setColor(AWMember.displayHexColor)
+            .setFooter(`UserID: ${AWUser.id}`)
+            .setTimestamp()
+            .setThumbnail(AWUser.avatarURL)
+            .addField(`Warning:`,
+                `Issued by: <@484821107954810891>`
+                + `\n**Issue Time:** ${issueTime}`
+                + `\nReason: ${AutoWarnReason}`
+                + `\n[Link to warning](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
+        let warnchannel = message.guild.channels.find((channel => channel.name === ModLog.ModLogchan));
+        if (warnchannel !== "null") {
+            message.channel.send(`${AWMember} has been warned, with a total of ${WarnCount.length} warns.`);
+            warnchannel.send(warnEmbed).catch(error => {
+                message.reply("I was unable to type in #mod-actions, so i will post it here.");
+                message.channel.send(warnEmbed);
+            });
+        }
         AWMember.send(warnEmbed);
-    }
-    else {
-        message.channel.send(`${AWMember} has been warned, with a total of ${WarnCount.length} warns.`);
-        warnchannel.send(warnEmbed).catch(error => {
-            message.reply("I was unable to type in #mod-actions, so i will post it here.");
-            message.channel.send(warnEmbed);
-        });
-
-        AWMember.send(warnEmbed);
-    };
+    })
 }

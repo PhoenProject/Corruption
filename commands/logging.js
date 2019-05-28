@@ -67,12 +67,20 @@ module.exports.run = async (client, message, args, sqlcon) => {
                         message.channel.send("Message logging channel has been set!")
                     }
                 }
-                if (args[1] === "members") {
+                else if (args[1] === "members") {
                     if (!message.mentions.channels.first()) message.channel.send("Please mention a channel!")
                     else {
                         sqlcon.query(`UPDATE guildprefs SET MemLogChan = ${message.mentions.channels.first().id} WHERE GuildID = '${message.guild.id}'`)
 
                         message.channel.send("Member logging channel has been set!")
+                    }
+                }
+                else if (args[1] === "mod") {
+                    if (!message.mentions.channels.first()) message.channel.send("Please mention a channel!")
+                    else {
+                        sqlcon.query(`UPDATE guildprefs SET ModLogchan = ${message.mentions.channels.first().id} WHERE GuildID = '${message.guild.id}'`)
+
+                        message.channel.send("mod action logging channel has been set!")
                     }
                 }
             }

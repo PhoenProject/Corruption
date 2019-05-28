@@ -51,25 +51,27 @@ module.exports.run = async (client, message, args, sqlcon) => {
         Member.addRole(mRole).catch(error => { utils.CatchError(message, error, cmdused) });
         setTimeout(function () {
           if (Member.roles.has(mRole.id)) {
-            let warnchannel = message.guild.channels.find((channel => channel.name === "mod-actions"));
-            if (warnchannel) {
-              let reason = args.slice(1).join(" ");
-              if (reason === "") reason = "No reason given!"
-              let muteEmbed = new Discord.RichEmbed()
-                .setAuthor(`Mute given to ${Member.user.tag}`, Member.user.avatarURL)
-                .setColor(Member.displayHexColor)
-                .setFooter(`UserID: ${Member.user.id}`)
-                .setTimestamp()
-                .setThumbnail(Member.user.avatarURL)
-                .addField(`Mute:`,
-                  `Issued by ${message.author}`
-                  + `\n**Issue Time:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-                  + `\nReason: ${reason}`
-                  + `\n[Link to mute](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
-              warnchannel.send(muteEmbed)
+            sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
+              let warnchannel = message.guild.channels.find((channel => channel.name === ModLog.ModLogchan));
+              if (warnchannel !== "null") {
+                let reason = args.slice(1).join(" ");
+                if (reason === "") reason = "No reason given!"
+                let muteEmbed = new Discord.RichEmbed()
+                  .setAuthor(`Mute given to ${Member.user.tag}`, Member.user.avatarURL)
+                  .setColor(Member.displayHexColor)
+                  .setFooter(`UserID: ${Member.user.id}`)
+                  .setTimestamp()
+                  .setThumbnail(Member.user.avatarURL)
+                  .addField(`Mute:`,
+                    `Issued by ${message.author}`
+                    + `\n**Issue Time:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
+                    + `\nReason: ${reason}`
+                    + `\n[Link to mute](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
+                warnchannel.send(muteEmbed)
+              }
+              message.channel.send(`${Member} has been given the Muted role!`)
 
-            }
-            message.channel.send(`${Member} has been given the Muted role!`)
+            })
           }
         }, 500);
       }

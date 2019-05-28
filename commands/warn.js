@@ -30,13 +30,14 @@ async function WarnMessage(message, member, reason, sqlcon) {
         + `\n**Issue Time:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
         + `\nReason: ${reason}`
         + `\n[Link to warning](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
-    let warnchannel = message.guild.channels.find((channel => channel.name === "mod-actions"));
-    if (warnchannel) {
-      message.reply("I was unable to find a #mod-actions channel, so i will post it here.");
-      message.channel.send(warnEmbed);
+    sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
+      let warnchannel = message.guild.channels.find((channel => channel.name === ModLog.ModLogchan));
+      if (warnchannel !== "null") {
+        warnchannel.send(warnEmbed)
+      }
+      message.channel.send(`${member} has been warned, with a total of ${warnCount.length} warns.`);
       member.send(warnEmbed);
-    }
-    message.channel.send(`${member} has been warned, with a total of ${warnCount.length} warns.`);
+    })
   })
 }
 async function HandleWarns(message, member, reason, sqlcon, cmdused) {

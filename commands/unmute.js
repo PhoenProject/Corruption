@@ -26,20 +26,23 @@ module.exports.run = async (client, message, args, sqlcon) => {
             else {
                 Member.removeRole(mRole).catch(error => { utils.CatchError(message, error, cmdused) });
                 setTimeout(function () {
-                    let warnchannel = message.guild.channels.find((channel => channel.name === "mod-actions"));
-                    if (warnchannel)  {
-                        let muteEmbed = new Discord.RichEmbed()
-                            .setAuthor(`Mute removed from ${Member.user.tag}`, Member.user.avatarURL)
-                            .setColor(Member.displayHexColor)
-                            .setFooter(`UserID: ${Member.user.id}`)
-                            .setTimestamp()
-                            .setThumbnail(Member.user.avatarURL)
-                            .addField(`Mute:`,
-                                `Removed by ${message.author}`
-                                + `\n**Time of removal:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`);
-                        warnchannel.send(muteEmbed)
-                    }
-                    message.channel.send(`${Member} has been unmuted!`)
+                    sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
+                        let warnchannel = message.guild.channels.find((channel => channel.name === ModLog.ModLogchan));
+                        if (warnchannel !== "null") {
+                            let muteEmbed = new Discord.RichEmbed()
+                                .setAuthor(`Mute removed from ${Member.user.tag}`, Member.user.avatarURL)
+                                .setColor(Member.displayHexColor)
+                                .setFooter(`UserID: ${Member.user.id}`)
+                                .setTimestamp()
+                                .setThumbnail(Member.user.avatarURL)
+                                .addField(`Mute:`,
+                                    `Removed by ${message.author}`
+                                    + `\n**Time of removal:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`);
+                            warnchannel.send(muteEmbed)
+                        }
+                        message.channel.send(`${Member} has been unmuted!`)
+                    })
+
                 }, 500);
             }
         }

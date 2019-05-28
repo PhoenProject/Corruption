@@ -25,6 +25,7 @@ module.exports.globalfilter = (client, message, sqlcon) => {
 }
 module.exports.filter = (client, message, sqlcon) => {
     sqlcon.query(`SELECT * FROM filter WHERE GuildID = '${message.guild.id}'`, (err, filtered) => {
+        console.log(filtered)
         if (filtered != undefined) {
             filtered.forEach(element => {
                 if (message.content.includes(element.word)) {

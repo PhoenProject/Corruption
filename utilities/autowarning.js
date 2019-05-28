@@ -5,18 +5,22 @@ const moment = require("moment");
 const fs = require("fs");
 
 module.exports.globalfilter = (client, message, sqlcon) => {
-    sqlcon.query(`SELECT * FROM globalfilter`, (err, words) => {
-        words.forEach(element => {
-            let msg = message.content.toLowerCase()
-            if (msg.includes(element.word)) {
-                let AutoWarnReason = "Saying a globally filtered word"
-                let AWUser = message.author
-                let AWMember = message.member
-                let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
-                AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
-                message.delete().catch(error => {console.log(error)})
-            }
-        });
+    sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
+        if (rows[0].GlobalFilter == true) {
+            sqlcon.query(`SELECT * FROM globalfilter`, (err, words) => {
+                words.forEach(element => {
+                    let msg = message.content.toLowerCase()
+                    if (msg.includes(element.word)) {
+                        let AutoWarnReason = "Saying a globally filtered word"
+                        let AWUser = message.author
+                        let AWMember = message.member
+                        let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
+                        AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
+                        message.delete().catch(error => { console.log(error) })
+                    }
+                });
+            })
+        }
     })
 }
 module.exports.filter = (client, message, sqlcon) => {
@@ -28,7 +32,7 @@ module.exports.filter = (client, message, sqlcon) => {
                 let AWMember = message.member
                 let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
                 AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
-                message.delete().catch(error => {console.log(error)})
+                message.delete().catch(error => { console.log(error) })
             }
         });
     })

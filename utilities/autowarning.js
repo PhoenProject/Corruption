@@ -24,17 +24,19 @@ module.exports.globalfilter = (client, message, sqlcon) => {
     })
 }
 module.exports.filter = (client, message, sqlcon) => {
-    sqlcon.query(`SELECT * FROM filter WHERE GuildID = '${message.guild.id}'`, (err, words) => {
-        words.forEach(element => {
-            if (message.content.includes(element.word)) {
-                let AutoWarnReason = "Saying a filtered word"
-                let AWUser = message.author
-                let AWMember = message.member
-                let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
-                AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
-                message.delete().catch(error => { console.log(error) })
-            }
-        });
+    sqlcon.query(`SELECT * FROM filter WHERE GuildID = '${message.guild.id}'`, (err, filtered) => {
+        if (filtered != undefined) {
+            filtered.forEach(element => {
+                if (message.content.includes(element.word)) {
+                    let AutoWarnReason = "Saying a filtered word"
+                    let AWUser = message.author
+                    let AWMember = message.member
+                    let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
+                    AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
+                    message.delete().catch(error => { console.log(error) })
+                }
+            });
+        }
     })
 }
 module.exports.massping = (client, message, sqlcon) => {

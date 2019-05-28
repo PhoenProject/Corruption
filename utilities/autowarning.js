@@ -25,10 +25,9 @@ module.exports.globalfilter = (client, message, sqlcon) => {
 }
 module.exports.filter = (client, message, sqlcon) => {
     sqlcon.query(`SELECT * FROM filter WHERE GuildID = '${message.guild.id}'`, (err, filtered) => {
-        console.log(filtered)
         if (filtered != undefined) {
             filtered.forEach(element => {
-                if (message.content.includes(element.word)) {
+                if (message.content.includes(element.Word)) {
                     let AutoWarnReason = "Saying a filtered word"
                     let AWUser = message.author
                     let AWMember = message.member

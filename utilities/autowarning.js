@@ -15,7 +15,7 @@ module.exports.globalfilter = (client, message, sqlcon) => {
                         let AWUser = message.author
                         let AWMember = message.member
                         let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
-                        AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
+                        AddAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
                         message.delete().catch(error => { console.log(error) })
                     }
                 });
@@ -32,7 +32,7 @@ module.exports.filter = (client, message, sqlcon) => {
                     let AWUser = message.author
                     let AWMember = message.member
                     let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
-                    AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
+                    AddAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
                     message.delete().catch(error => { console.log(error) })
                 }
             });
@@ -48,7 +48,7 @@ module.exports.massping = (client, message, sqlcon) => {
             let AWUser = message.author
             let AWMember = message.member
             let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
-            AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
+            AddAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
         }
         else if (TotalMentions > 7) {
             message.member.ban("Automatic ban for mass pinging 8 or more users/roles").catch(error => { utils.CatchError(message, error, cmdused) });
@@ -56,7 +56,7 @@ module.exports.massping = (client, message, sqlcon) => {
         }
     }
 }
-async function AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message) {
+async function AddAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message) {
     sqlcon.query(`SELECT * FROM warnsnew WHERE UserID = '${AWUser.id}' AND GuildID = '${message.guild.id}'`, (err, WarnCount) => {
         if (err) utils.ConsoleMessage(err, client)
         if (WarnCount.length < 1) {
@@ -69,10 +69,10 @@ async function AddAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, 
         }
         else if (WarnCount == undefined) console.log("There has been an issue!")
 
-        HandleAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
+        HandleAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
     })
 }
-async function HandleAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message) {
+async function HandleAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message) {
     sqlcon.query(`SELECT * FROM warnsnew WHERE UserID = '${AWUser.id}' AND GuildID = '${message.guild.id}'`, (err, WarnCount) => {
         if (WarnCount.length === '1') {
             let mRole = message.guild.roles.find(role => role.name === "Warned")
@@ -142,10 +142,10 @@ async function HandleAutoWarn(AutoWarnReason, AWUser, AWMember, issueTime, sqlco
             message.channel.send("User has been banned from the server!")
         };
 
-        AutoWarnMessage(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message, WarnCount)
+        AutoWarnMessage(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message, WarnCount)
     })
 }
-async function AutoWarnMessage(AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message, WarnCount) {
+async function AutoWarnMessage(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message, WarnCount) {
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
         let warnEmbed = new Discord.RichEmbed()
             .setAuthor(`Warn issued for ${AWUser.tag}`, AWUser.avatarURL)

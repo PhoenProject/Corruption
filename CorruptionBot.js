@@ -184,7 +184,7 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 client.on("messageDelete", async message => {
 	if (!message.guild) return
 	else {
-		let logs = await message.guild.fetchAuditLogs({ type: 72 }).catch(error => { ConsoleMessage(error) });
+		let logs = await message.guild.fetchAuditLogs({ type: 72 }).catch(error => { utils.ConsoleMessage(error) });
 		let entry = logs.entries.first();
 
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {

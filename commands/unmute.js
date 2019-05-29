@@ -27,7 +27,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
                 Member.removeRole(mRole).catch(error => { utils.CatchError(message, error, cmdused) });
                 setTimeout(function () {
                     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
-                        let warnchannel = message.guild.channels.find((channel => channel.id === ModLog.ModLogchan));
+                        let warnchannel = message.guild.channels.find((channel => channel.id === ModLog[0].ModLogchan));
                         if (warnchannel != null) {
                             let muteEmbed = new Discord.RichEmbed()
                                 .setAuthor(`Mute removed from ${Member.user.tag}`, Member.user.avatarURL)

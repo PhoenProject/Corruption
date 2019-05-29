@@ -377,11 +377,12 @@ async function Watch(client, message, sqlcon) {
 
                             if (Haddnotes.first().toString().toLowerCase() != "none") wantedembed.addField(`Additional Notes`, Haddnotes.first().content)
 
+                            let SQLreason = Haddnotes.first().toString().replace(/'/g, '~')
+
                             console.log(Hname)
                             console.log(Hsteamid.first().toString())
                             console.log(SQLreason)
 
-                            let SQLreason = Haddnotes.first().toString().replace(/'/g, '~')
                             sqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '0', '1')`)
 
                             message.guild.channels.find(channel => channel.id === "440887611406680096").send(wantedembed)

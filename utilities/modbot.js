@@ -316,7 +316,7 @@ async function Hacker(client, message, sqlcon) {
                             if (Haddnotes.first().toString().toLowerCase() != "none") wantedembed.addField(`Additional Notes`, Haddnotes.first().content)
 
                             let SQLreason = Haddnotes.first().toString().replace(/'/g, '~')
-                            sqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '1', '0')`)
+                            sqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname.first().content}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '1', '0')`)
 
                             wantedembed.addField("Warning!", "This user has been flagged as a possible hacker")
                             message.guild.channels.find(channel => channel.id === "440887611406680096").send(wantedembed)
@@ -379,11 +379,7 @@ async function Watch(client, message, sqlcon) {
 
                             let SQLreason = Haddnotes.first().toString().replace(/'/g, '~')
 
-                            console.log(Hname)
-                            console.log(Hsteamid.first().toString())
-                            console.log(SQLreason)
-
-                            sqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '0', '1')`)
+                            sqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname.first().content}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '0', '1')`)
 
                             message.guild.channels.find(channel => channel.id === "440887611406680096").send(wantedembed)
                             message.channel.bulkDelete(6).catch(error => {console.log(error)})

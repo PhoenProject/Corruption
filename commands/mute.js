@@ -52,7 +52,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
         setTimeout(function () {
           if (Member.roles.has(mRole.id)) {
             sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
-              let warnchannel = message.guild.channels.find((channel => channel.name === ModLog.ModLogchan));
+              let warnchannel = message.guild.channels.find((channel => channel.id === ModLog.ModLogchan));
               if (warnchannel !== "null") {
                 let reason = args.slice(1).join(" ");
                 if (reason === "") reason = "No reason given!"

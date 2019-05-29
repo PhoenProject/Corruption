@@ -1,8 +1,33 @@
 const Discord = require("discord.js");
+const mysql = require("mysql");
 const config = require("../config.json");
 const utils = require("./utils.js");
 const moment = require("moment");
 const fs = require("fs");
+
+var statssqlcon = mysql.createConnection({
+    host: config.SBhost,
+    user: config.SBuser,
+    password: config.SBpassword,
+    database: config.SBdatabase,
+    charset: 'utf8mb4'
+});
+statssqlcon.connect(err => {
+    if (err) utils.ConsoleMessage(err, client)
+    console.log("Connected To Database");
+})
+statssqlconn.on('error', error => {
+    if (error.code === 'PROTOCOL_CONNECTION_LOST') {
+        statssqlcon = mysql.createConnection({
+            host: config.SBhost,
+            user: config.SBuser,
+            password: config.SBpassword,
+            database: config.SBdatabase,
+            charset: 'utf8mb4'
+        });
+    } else console.log(error)
+})
+
 
 module.exports.AutoModLogChan = (client, message, sqlcon) => {
     if (message.content.includes("**Player Banned**")) {
@@ -82,7 +107,7 @@ module.exports.CommandChans = (client, message, sqlcon) => {
         Actionlog(client, message)
     }
     else if (message.content.startsWith("?ontime") && (message.member.roles.has("418396672108920832") || message.member.roles.has("456171232065224705"))) {
-        sqlcon.query(`SELECT * FROM stafflist WHERE DiscordID = '${message.author.id}'`, (err, staff) => {
+        statssqlcon.query(`SELECT * FROM stafflist WHERE DiscordID = '${message.author.id}'`, (err, staff) => {
             if (staff === undefined || staff.length < 1) {
                 message.reply("Sorry, but i can not find you in the database!")
             }
@@ -99,7 +124,7 @@ module.exports.CommandChans = (client, message, sqlcon) => {
     }
     else if (message.content.startsWith("?adminontime") && (message.member.roles.has("541986233807536129") || message.member.hasPermission("ADMINISTRATOR"))) {
         message.delete(250).catch(error => {console.log(error)})
-        sqlcon.query(`SELECT * FROM stafflist ORDER BY PlayTime DESC`, (err, staff) => {
+        statssqlcon.query(`SELECT * FROM stafflist ORDER BY PlayTime DESC`, (err, staff) => {
             if (staff == undefined) message.channel.send(err)
             else {
                 let staffstats = "Current staff stats:\n\n"
@@ -316,7 +341,7 @@ async function Hacker(client, message, sqlcon) {
                             if (Haddnotes.first().toString().toLowerCase() != "none") wantedembed.addField(`Additional Notes`, Haddnotes.first().content)
 
                             let SQLreason = Haddnotes.first().toString().replace(/'/g, '~')
-                            sqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname.first().content}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '1', '0')`)
+                            statssqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname.first().content}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '1', '0')`)
 
                             wantedembed.addField("Warning!", "This user has been flagged as a possible hacker")
                             message.guild.channels.find(channel => channel.id === "440887611406680096").send(wantedembed)
@@ -379,7 +404,7 @@ async function Watch(client, message, sqlcon) {
 
                             let SQLreason = Haddnotes.first().toString().replace(/'/g, '~')
 
-                            sqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname.first().content}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '0', '1')`)
+                            statssqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname.first().content}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '0', '1')`)
 
                             message.guild.channels.find(channel => channel.id === "440887611406680096").send(wantedembed)
                             message.channel.bulkDelete(6).catch(error => {console.log(error)})

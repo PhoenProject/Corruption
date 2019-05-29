@@ -71,55 +71,6 @@ module.exports.offduty = (client, message, MsgContent) => {
         });
     }
 }
-module.exports.access = (client, message, MsgContent) => {
-    let Role = message.guild.roles.find(role => role.id === "546362093838925828")
-    if (!message.member.roles.find(role => role.id === Role.id)) {
-        message.member.addRole(Role).catch(error => { message.channel.send(`Sorry, but i was unable to do that command because ${error}`) })
-        message.channel.send(`Sucessfully granted ${message.author} access!`)
-    }
-    else if (message.member.roles.find(role => role.id === Role.id)) {
-        message.member.removeRole(Role).catch(error => { message.channel.send(`Sorry, but i was unable to do that command because ${error}`) });
-        message.channel.send(`Sucessfully removed access from ${message.author}!`)
-    }
-}
-module.exports.nsfw = (client, message, MsgContent) => {
-    let Role = message.guild.roles.find(role => role.id === "570989830973030401")
-    if (!message.member.roles.find(role => role.id === Role.id)) {
-        const filter = m => m.author.id === message.author.id
-        message.channel.send("You are requesting access to our NSFW channel. This channel contents are not suitable for those under the age of 18!"
-            + "\nBy accepting this agreement, you agree that you are over the age of 18!"
-            + "\nTo agree, type `agree`. To cancel, type `cancel`. (This form will time out in 20 seconds)")
-        message.channel.awaitMessages(filter, { max: 1, time: 20000, errors: ['time'] }).then((Agreement) => {
-            if (Agreement.first().toString().toLowerCase() === "agree") {
-                message.member.addRole(Role).catch(error => { message.channel.send(`Sorry, but i was unable to do that command because ${error}`) })
-                message.channel.bulkDelete(2)
-                message.channel.send("You have been granted access to our NSFW channel!")
-            }
-            if (Agreement.first().toString().toLowerCase() === "cancel") {
-                message.channel.bulkDelete(2)
-            }
-        }).catch(Error => {
-            utils.ConsoleMessage(Error, client)
-            message.channel.bulkDelete(1)
-        });
-
-    }
-    else if (message.member.roles.find(role => role.id === Role.id)) {
-        message.member.removeRole(Role).catch(error => { message.channel.send(`Sorry, but i was unable to do that command because ${error}`) });
-        message.channel.send("Your NSFW access has been revoked!")
-    }
-}
-module.exports.test = (client, message, MsgContent) => {
-    let Role = message.guild.roles.find(role => role.id === "551744730891812884")
-    if (!message.member.roles.find(role => role.id === Role.id)) {
-        message.member.addRole(Role).catch(error => { message.channel.send(`Sorry, but i was unable to do that command because ${error}`) })
-        message.channel.send(`Sucessfully granted ${message.author} tester!`)
-    }
-    else if (message.member.roles.find(role => role.id === Role.id)) {
-        message.member.removeRole(Role).catch(error => { message.channel.send(`Sorry, but i was unable to do that command because ${error}`) });
-        message.channel.send(`Sucessfully removed tester from ${message.author}!`)
-    }
-}
 /*module.exports.staff = (client, message, MsgContent, sqlcon) => {
     let args = message.content.split(' ')
     if (message.member.mentions.first() == null) message.reply("You forgot to @mention the user!")

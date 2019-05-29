@@ -16,7 +16,7 @@ statssqlcon.connect(err => {
     if (err) utils.ConsoleMessage(err, client)
     console.log("Connected To Database");
 })
-statssqlconn.on('error', error => {
+statssqlcon.on('error', error => {
     if (error.code === 'PROTOCOL_CONNECTION_LOST') {
         statssqlcon = mysql.createConnection({
             host: config.SBhost,

@@ -159,7 +159,7 @@ async function AutoWarnMessage(client, AutoWarnReason, AWUser, AWMember, issueTi
                 + `\nReason: ${AutoWarnReason}`
                 + `\n[Link to warning](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
         let warnchannel = message.guild.channels.find((channel => channel.id === ModLog.ModLogchan));
-        if (warnchannel !== "null") {
+        if (warnchannel != null) {
             message.channel.send(`${AWMember} has been warned, with a total of ${WarnCount.length} warns.`);
             warnchannel.send(warnEmbed).catch(error => {
                 message.reply("I was unable to type in #mod-actions, so i will post it here.");

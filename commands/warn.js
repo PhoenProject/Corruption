@@ -32,7 +32,7 @@ async function WarnMessage(message, member, reason, sqlcon) {
         + `\n[Link to warning](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
       let warnchannel = message.guild.channels.find((channel => channel.id === ModLog.ModLogchan));
-      if (warnchannel !== "null") {
+      if (warnchannel != null) {
         warnchannel.send(warnEmbed)
       }
       message.channel.send(`${member} has been warned, with a total of ${warnCount.length} warns.`);

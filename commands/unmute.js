@@ -28,7 +28,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
                 setTimeout(function () {
                     sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
                         let warnchannel = message.guild.channels.find((channel => channel.id === ModLog.ModLogchan));
-                        if (warnchannel !== "null") {
+                        if (warnchannel != null) {
                             let muteEmbed = new Discord.RichEmbed()
                                 .setAuthor(`Mute removed from ${Member.user.tag}`, Member.user.avatarURL)
                                 .setColor(Member.displayHexColor)

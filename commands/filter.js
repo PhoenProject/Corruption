@@ -44,6 +44,11 @@ module.exports.run = async (client, message, args, sqlcon) => {
                 message.delete()
                 message.channel.send("Word has been added to the filter!")
             }
+            else if(args[0] == "remove"){
+                sqlcon.query(`DELETE FROM filter WHERE GuildID = '${message.guild.id}' AND Word = '${args[1]}'`)
+                message.delete()
+                message.channel.send("Word has been removed from the filter!")
+            }
         }
     })
 }

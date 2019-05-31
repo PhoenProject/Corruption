@@ -329,9 +329,6 @@ function MessageCheck(message, sqlguild, sqlcon) {
 							case "offduty":
 								dscp.offduty(client, message, MsgContent)
 								break;
-							case "access":
-								dscp.access(client, message, MsgContent)
-								break;
 							case "tester":
 								dscp.test(client, message, MsgContent)
 								break;

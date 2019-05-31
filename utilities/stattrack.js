@@ -63,8 +63,9 @@ module.exports.main = (client, message) => {
                 else {
                     if (SteamIDCheck[0].DiscordID == '') {
                         try {
-                            let name = message.member.nickname.replace(/'/g, "~~")
+                            let name
                             if (message.member.nickname == null) name = message.author.username.replace(/'/g, "~~")
+                            else name = message.member.nickname.replace(/'/g, "~~")
                             sqlcon.query(`UPDATE playerstats SET DiscordID = '${message.author.id}', Name = '${name}' WHERE SteamID = '${args[2]}'`)
                             message.reply("You have sucessfully linked your Discord to your SteamID64")
                         }

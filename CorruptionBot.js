@@ -317,7 +317,9 @@ function MessageCheck(message, sqlguild, sqlcon) {
 				if (!message.content.startsWith(sqlguild[0].Prefix)) {
 					if (sqlchannel[0].MsgVote === 'true') { MsgVoteChan(message, sqlcon, sqlguild) }
 					if (message.guild.id === "582850539604279296" && message.channel.id === "582858846519820298") {
-						switch (message.content.toLowerCase) {
+						let Choice = message.content.toLowerCase()
+						console.log(Choice)
+						switch (Choice) {
 							case "dscp":
 							case "dragon":
 							case "dragonscp":

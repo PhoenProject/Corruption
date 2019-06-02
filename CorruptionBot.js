@@ -314,7 +314,26 @@ function MessageCheck(message, sqlguild, sqlcon) {
 			if (sqlchannelcreate.length < 1) { CreateChanPrefs(message, sqlcon) }
 			sqlcon.query(`SELECT * FROM chanprefs WHERE GuildID = '${message.guild.id}' AND ChannelID = '${message.channel.id}'`, (err, sqlchannel) => {
 				if (err) ConsoleMessage(error)
-				if (!message.content.startsWith(sqlguild[0].Prefix) && sqlchannel[0].MsgVote === 'true') { MsgVoteChan(message, sqlcon, sqlguild) }
+				if (!message.content.startsWith(sqlguild[0].Prefix)) { 
+					if (sqlchannel[0].MsgVote === 'true') { MsgVoteChan(message, sqlcon, sqlguild) } 
+					if (message.guild.id === "582850539604279296" && message.channel.id === "582858846519820298") {
+						switch (message.content.toLowerCase) {
+							case "dscp":
+							case "dragon":
+							case "dragonscp":
+							case "dragon scp":
+								let DRole = message.guild.roles.find(role => role.id === "582851827058343956");
+								message.member.addRole(DRole).catch(error => { utils.CatchError(message, error, cmdused) });
+								break;
+							case "asylum":
+							case "the asylum":
+								let ARole = message.guild.roles.find(role => role.id === "582851825208786944");
+								message.member.addRole(ARole).catch(error => { utils.CatchError(message, error, cmdused) });
+								break;
+							default:
+								break;
+						}
+				}
 				else if (message.content.startsWith(sqlguild[0].Prefix)) {
 					let Message = message.content.slice((sqlguild[0].Prefix).length);
 					let MsgContent = Message.split(" ");
@@ -352,70 +371,53 @@ function MessageCheck(message, sqlguild, sqlcon) {
 								break;
 						}
 					}
-					else if (message.guild.id === "582850539604279296" && message.channel.id === "582858846519820298") {
-						switch (message.content.toLowerCase) {
-							case "dscp":
-							case "dragon":
-							case "dragonscp":
-							case "dragon scp":
-								let DRole = message.guild.roles.find(role => role.id === "582851827058343956");
-								message.member.addRole(DRole).catch(error => { utils.CatchError(message, error, cmdused) });
-								break;
-							case "asylum":
-							case "the asylum":
-								let ARole = message.guild.roles.find(role => role.id === "582851825208786944");
-								message.member.addRole(ARole).catch(error => { utils.CatchError(message, error, cmdused) });
-								break;
-							default:
-								break;
-						}
-					}
-					switch (cmd) {
-						case "heartofcorruption":
-						case "devserver":
-						case "hoc":
-							message.author.send("https://discord.gg/asVrGDm")
-							break;
-						case "github":
-						case "gh":
-						case "git":
-						case "source":
-						case "code":
-						case "sourcecode":
-						case "sc":
-							message.author.send("https://github.com/PhoenProject/CorruptionBot")
-							break;
-						case "help":
-						case "info":
-						case "commands":
-							sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => { Help(message, rows) })
-							break;
-						case "ping":
-							PingCommand(message)
-							break;
-						case "contact":
-							ContactCommand(client, message, args)
-							break;
-						case "reload":
-							Reloadcommand(message)
-							break;
-						case "restart":
-							Restart(message)
-							break;
-						case "update":
-							Update(message)
-							break;
-						case "setup":
-							sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, prefix) => { Setup(message, prefix) })
-							break;
-						default:
-							if (commandfile) commandfile.run(client, message, args, sqlcon);
-							break;
-					}
 				}
+				switch (cmd) {
+					case "heartofcorruption":
+					case "devserver":
+					case "hoc":
+						message.author.send("https://discord.gg/asVrGDm")
+						break;
+					case "github":
+					case "gh":
+					case "git":
+					case "source":
+					case "code":
+					case "sourcecode":
+					case "sc":
+						message.author.send("https://github.com/PhoenProject/CorruptionBot")
+						break;
+					case "help":
+					case "info":
+					case "commands":
+						sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => { Help(message, rows) })
+						break;
+					case "ping":
+						PingCommand(message)
+						break;
+					case "contact":
+						ContactCommand(client, message, args)
+						break;
+					case "reload":
+						Reloadcommand(message)
+						break;
+					case "restart":
+						Restart(message)
+						break;
+					case "update":
+						Update(message)
+						break;
+					case "setup":
+						sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, prefix) => { Setup(message, prefix) })
+						break;
+					default:
+						if (commandfile) commandfile.run(client, message, args, sqlcon);
+						break;
+				}
+			}
 			})
-		})
-	}
+	})
+}
 }
 
 ///MySQL data creation

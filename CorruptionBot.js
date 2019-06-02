@@ -314,8 +314,8 @@ function MessageCheck(message, sqlguild, sqlcon) {
 			if (sqlchannelcreate.length < 1) { CreateChanPrefs(message, sqlcon) }
 			sqlcon.query(`SELECT * FROM chanprefs WHERE GuildID = '${message.guild.id}' AND ChannelID = '${message.channel.id}'`, (err, sqlchannel) => {
 				if (err) ConsoleMessage(error)
-				if (!message.content.startsWith(sqlguild[0].Prefix)) { 
-					if (sqlchannel[0].MsgVote === 'true') { MsgVoteChan(message, sqlcon, sqlguild) } 
+				if (!message.content.startsWith(sqlguild[0].Prefix)) {
+					if (sqlchannel[0].MsgVote === 'true') { MsgVoteChan(message, sqlcon, sqlguild) }
 					if (message.guild.id === "582850539604279296" && message.channel.id === "582858846519820298") {
 						switch (message.content.toLowerCase) {
 							case "dscp":
@@ -333,6 +333,7 @@ function MessageCheck(message, sqlguild, sqlcon) {
 							default:
 								break;
 						}
+					}
 				}
 				else if (message.content.startsWith(sqlguild[0].Prefix)) {
 					let Message = message.content.slice((sqlguild[0].Prefix).length);

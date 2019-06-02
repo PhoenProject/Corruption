@@ -358,13 +358,13 @@ function MessageCheck(message, sqlguild, sqlcon) {
 							case "dragon":
 							case "dragonscp":
 							case "dragon scp":
-								let role = message.guild.roles.find(role => role.id === "582851827058343956");
-								message.member.addRole(role).catch(error => { utils.CatchError(message, error, cmdused) });
+								let DRole = message.guild.roles.find(role => role.id === "582851827058343956");
+								message.member.addRole(DRole).catch(error => { utils.CatchError(message, error, cmdused) });
 								break;
 							case "asylum":
 							case "the asylum":
-								let role = message.guild.roles.find(role => role.id === "582851825208786944");
-								message.member.addRole(role).catch(error => { utils.CatchError(message, error, cmdused) });
+								let ARole = message.guild.roles.find(role => role.id === "582851825208786944");
+								message.member.addRole(ARole).catch(error => { utils.CatchError(message, error, cmdused) });
 								break;
 							default:
 								break;

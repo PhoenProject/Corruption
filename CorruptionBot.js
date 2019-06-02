@@ -372,48 +372,48 @@ function MessageCheck(message, sqlguild, sqlcon) {
 								break;
 						}
 					}
-				}
-				switch (cmd) {
-					case "heartofcorruption":
-					case "devserver":
-					case "hoc":
-						message.author.send("https://discord.gg/asVrGDm")
-						break;
-					case "github":
-					case "gh":
-					case "git":
-					case "source":
-					case "code":
-					case "sourcecode":
-					case "sc":
-						message.author.send("https://github.com/PhoenProject/CorruptionBot")
-						break;
-					case "help":
-					case "info":
-					case "commands":
-						sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => { Help(message, rows) })
-						break;
-					case "ping":
-						PingCommand(message)
-						break;
-					case "contact":
-						ContactCommand(client, message, args)
-						break;
-					case "reload":
-						Reloadcommand(message)
-						break;
-					case "restart":
-						Restart(message)
-						break;
-					case "update":
-						Update(message)
-						break;
-					case "setup":
-						sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, prefix) => { Setup(message, prefix) })
-						break;
-					default:
-						if (commandfile) commandfile.run(client, message, args, sqlcon);
-						break;
+					switch (cmd) {
+						case "heartofcorruption":
+						case "devserver":
+						case "hoc":
+							message.author.send("https://discord.gg/asVrGDm")
+							break;
+						case "github":
+						case "gh":
+						case "git":
+						case "source":
+						case "code":
+						case "sourcecode":
+						case "sc":
+							message.author.send("https://github.com/PhoenProject/CorruptionBot")
+							break;
+						case "help":
+						case "info":
+						case "commands":
+							sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => { Help(message, rows) })
+							break;
+						case "ping":
+							PingCommand(message)
+							break;
+						case "contact":
+							ContactCommand(client, message, args)
+							break;
+						case "reload":
+							Reloadcommand(message)
+							break;
+						case "restart":
+							Restart(message)
+							break;
+						case "update":
+							Update(message)
+							break;
+						case "setup":
+							sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, prefix) => { Setup(message, prefix) })
+							break;
+						default:
+							if (commandfile) commandfile.run(client, message, args, sqlcon);
+							break;
+					}
 				}
 			})
 		})

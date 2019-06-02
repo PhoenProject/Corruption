@@ -415,10 +415,9 @@ function MessageCheck(message, sqlguild, sqlcon) {
 						if (commandfile) commandfile.run(client, message, args, sqlcon);
 						break;
 				}
-			}
 			})
-	})
-}
+		})
+	}
 }
 
 ///MySQL data creation

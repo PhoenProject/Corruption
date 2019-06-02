@@ -325,7 +325,7 @@ function MessageCheck(message, sqlguild, sqlcon) {
 							case "dragonscp":
 							case "dragon scp":
 								let DRole = message.guild.roles.find(role => role.id === "582851827058343956");
-								message.guild.member.addRole(DRole).catch(error => { utils.CatchError(message, error, cmdused) });
+								message.member.addRole(DRole).catch(error => { utils.CatchError(message, error, cmdused) });
 								break;
 							case "asylum":
 							case "the asylum":

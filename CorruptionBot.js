@@ -352,6 +352,24 @@ function MessageCheck(message, sqlguild, sqlcon) {
 								break;
 						}
 					}
+					else if (message.guild.id === "582850539604279296" && message.channel.id === "582858846519820298") {
+						switch (message.content.toLowerCase) {
+							case "dscp":
+							case "dragon":
+							case "dragonscp":
+							case "dragon scp":
+								let role = message.guild.roles.find(role => role.id === "582851827058343956");
+								message.member.addRole(role).catch(error => { utils.CatchError(message, error, cmdused) });
+								break;
+							case "asylum":
+							case "the asylum":
+								let role = message.guild.roles.find(role => role.id === "582851825208786944");
+								message.member.addRole(role).catch(error => { utils.CatchError(message, error, cmdused) });
+								break;
+							default:
+								break;
+						}
+					}
 					switch (cmd) {
 						case "heartofcorruption":
 						case "devserver":
@@ -715,8 +733,8 @@ function Setup(message, prefix) {
 			.addField(`Contactin the developer`, 'If you need to contact the bot developer, then you can either join the discord server (Link can be gotten via the `'
 				+ prefix[0].Prefix + 'devserver` command), or by using the `' + prefix[0].Prefix + 'contact` command')
 
-		try {message.author.send(SetupGuide)}
-		catch (error) {message.channel.send(SetupGuide)}
+		try { message.author.send(SetupGuide) }
+		catch (error) { message.channel.send(SetupGuide) }
 	}
 
 }

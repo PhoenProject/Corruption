@@ -453,12 +453,12 @@ function AddGuildMember(member, mlogchannel) {
 	if (ageS.includes("seconds") || ageA[1] === "minute" || ageA[1] === "minutes" || ageA[1] === "hour" || ageA[1] === "hours" || ageA[1] === "day" || ageA[1] === "days") {
 		if (!member.guild.roles.find(role => role.name === "Anti-Alt")) {
 			MakeAntiAlt(member);
-			settimeout(function () {
+			setTimeout(function () {
 				if (!member.guild.roles.find(role => role.name === "Anti-Alt")) {
 					MakeAntiAlt(member);
 				}
 
-				settimeout(function () {
+				setTimeout(function () {
 					sInfo.addField("WARNING!", "This account is less than 30 days old, so has been given the Anti-Alt role")
 					let Role = member.guild.roles.find(role => role.name === "Anti-Alt")
 					member.addRole(Role)

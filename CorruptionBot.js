@@ -301,8 +301,7 @@ client.on('reconnecting', () => console.log('I am reconnecting now!'));
 // #endregion
 
 // #region Functions
-
-//Handle Message
+//#region Handle Message
 function MessageCheck(message, sqlguild, sqlcon) {
 	if (sqlguild.length < 1) {
 		let guild = message.guild
@@ -420,8 +419,9 @@ function MessageCheck(message, sqlguild, sqlcon) {
 		})
 	}
 }
+// #endregion
 
-///MySQL data creation
+//#region /MySQL data creation
 function CreateGuildPrefs(guild, sqlcon) {
 	let strTest = guild.name.replace(/[^0-9a-z]/gi, '')
 	let GuildName = strTest.replace(/'/g, '~');
@@ -433,8 +433,9 @@ function CreateChanPrefs(message, sqlcon) {
 	sqlcon.query(`INSERT INTO chanprefs (GuildID, ChannelID, MsgVote) VALUES ('${message.guild.id}', '${message.channel.id}', 'false')`)
 	MsgVoteChan(message, sqlcon)
 }
+// #endregion
 
-//Guild Member Functions
+//#region Guild Member Functions
 function AddGuildMember(member, mlogchannel) {
 	let User = client.users.find(user => user.id === member.id);
 	var cdate = moment(new Date(User.createdAt));
@@ -462,7 +463,7 @@ function AddGuildMember(member, mlogchannel) {
 					sInfo.addField("WARNING!", "This account is less than 30 days old, so has been given the Anti-Alt role")
 					let Role = member.guild.roles.find(role => role.name === "Anti-Alt")
 					member.addRole(Role)
-					member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions`)
+					member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions.`)
 					mlogchannel.send(sInfo)
 				}, 300)
 
@@ -472,7 +473,7 @@ function AddGuildMember(member, mlogchannel) {
 			sInfo.addField("WARNING!", "This account is less than 30 days old, so has been given the Anti-Alt role")
 			let Role = member.guild.roles.find(role => role.name === "Anti-Alt")
 			member.addRole(Role)
-			member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions`)
+			member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions.`)
 			mlogchannel.send(sInfo)
 		}
 	}
@@ -511,8 +512,9 @@ function AntiRaid(member) {
 		member.addRole(role).catch(O_o => { });
 	}
 }
+// #endregion
 
-//Guild Message Functions
+//#region Guild Message Functions
 function MessageDelete(message, entry, rows) {
 	let mlogchannel = message.guild.channels.find((channel => channel.id === rows[0].MsgLogChan));
 	if (mlogchannel != null) {
@@ -536,8 +538,9 @@ function MessageDelete(message, entry, rows) {
 		mlogchannel.send(sInfo).catch(O_o => { });
 	}
 }
+// #endregion
 
-//Chat Functions
+//#region Chat Functions
 function PingMessage(message, PrefixCheck) {
 	let guildPrefix
 	if (PrefixCheck.length < 1) { guildPrefix = config.prefix }
@@ -553,8 +556,9 @@ function MsgVoteChan(message, sqlcon, sqlguild) {
 		}, 100);
 	}
 }
+// #endregion
 
-//Command functions
+//#region Command functions
 function PingCommand(message) {
 	let cmdused = "ping"
 	if (message.author.id === config.ownerID) {
@@ -738,6 +742,7 @@ function Setup(message, prefix) {
 }
 // #endregion
 
+//#region Misc. functions
 function MakeAntiAlt(member) {
 	member.guild.createRole({
 		name: "Anti-Alt",
@@ -762,5 +767,8 @@ function MakeAntiAlt(member) {
 		});
 	}, 300);
 }
+// #endregion
+
+// #endregion
 
 client.login(config.token);

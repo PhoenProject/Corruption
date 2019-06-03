@@ -452,34 +452,29 @@ function AddGuildMember(member, mlogchannel) {
 	let ageA = ageS.split(" ");
 	if (ageS.includes("seconds") || ageA[1] === "minute" || ageA[1] === "minutes" || ageA[1] === "hour" || ageA[1] === "hours" || ageA[1] === "day" || ageA[1] === "days") {
 		if (!member.guild.roles.find(role => role.name === "Anti-Alt")) {
-			member.guild.createRole({
-				name: "Anti-Alt",
-				color: `#df6968`,
-				hoist: false,
-				position: 9,
-				permissions: [],
-				mentionable: false
-			}).catch(error => { return member.reply(`Sorry, i was unable to execute that command. ${error}`) });
-			setTimeout(function () {
-				let Guild = member.guild
-				let blarg = Guild.channels.filter(channel => channel.type === "text")
-				blarg.forEach(f => {
-					let mrole = member.guild.roles.find(role => role.name === "Anti-Alt").id
-					f.overwritePermissions(mrole, {
-						ATTACH_FILES: false,
-						EMBED_LINKS: false,
-						ADD_REACTIONS: false,
-						USE_EXTERNAL_EMOJIS: false,
-						CREATE_INSTANT_INVITE: false,
-					})
-				});
-			});
+			MakeAntiAlt(member);
+			settimeout(function () {
+				if (!member.guild.roles.find(role => role.name === "Anti-Alt")) {
+					MakeAntiAlt(member);
+				}
+
+				settimeout(function () {
+					sInfo.addField("WARNING!", "This account is less than 30 days old, so has been given the Anti-Alt role")
+					let Role = member.guild.roles.find(role => role.name === "Anti-Alt")
+					member.addRole(Role)
+					member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions`)
+					mlogchannel.send(sInfo)
+				}, 300)
+
+			}, 300)
 		}
-		sInfo.addField("WARNING!", "This account is less than 30 days old, so has been given the Anti-Alt role")
-		let Role = member.guild.roles.find(role => role.name === "Anti-Alt")
-		member.addRole(Role)
-		member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions`)
-		mlogchannel.send(sInfo)
+		else {
+			sInfo.addField("WARNING!", "This account is less than 30 days old, so has been given the Anti-Alt role")
+			let Role = member.guild.roles.find(role => role.name === "Anti-Alt")
+			member.addRole(Role)
+			member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions`)
+			mlogchannel.send(sInfo)
+		}
 	}
 	else {
 		mlogchannel.send(sInfo)
@@ -741,7 +736,31 @@ function Setup(message, prefix) {
 	}
 
 }
-
 // #endregion
+
+function MakeAntiAlt(member) {
+	member.guild.createRole({
+		name: "Anti-Alt",
+		color: `#df6968`,
+		hoist: false,
+		position: 9,
+		permissions: [],
+		mentionable: false
+	}).catch(error => { return member.reply(`Sorry, i was unable to execute that command. ${error}`) });
+	setTimeout(function () {
+		let Guild = member.guild
+		let blarg = Guild.channels.filter(channel => channel.type === "text")
+		blarg.forEach(f => {
+			let mrole = member.guild.roles.find(role => role.name === "Anti-Alt").id
+			f.overwritePermissions(mrole, {
+				ATTACH_FILES: false,
+				EMBED_LINKS: false,
+				ADD_REACTIONS: false,
+				USE_EXTERNAL_EMOJIS: false,
+				CREATE_INSTANT_INVITE: false,
+			})
+		});
+	}, 300);
+}
 
 client.login(config.token);

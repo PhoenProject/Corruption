@@ -136,12 +136,9 @@ client.on("guildMemberAdd", member => {
 	})
 });
 client.on("guildMemberRemove", member => {
+	let logs = member.guild.fetchAuditLogs({ type: 20 }).then(function () {
 
-	let logs = member.guild.fetchAuditLogs({ type: 20 }).catch(error => { utils.ConsoleMessage(error) });
-	console.log(logs)
-	let entry = logs.entries.first();
-
-	setTimeout(function () {
+		let entry = logs.entries.first();
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
 			if (err) ConsoleMessage(error)
 			if (rows[0] != undefined) {
@@ -179,8 +176,8 @@ client.on("guildMemberRemove", member => {
 					}
 				}
 			}
-		}, 250)
-	})
+		})
+	}).catch(error => { utils.ConsoleMessage(error) });
 });
 client.on("guildMemberUpdate", function (oldMem, newMem) {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${oldMem.guild.id}'`, (err, rows) => {
@@ -203,10 +200,9 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 	})
 });
 client.on("guildBanAdd", function (guild, member) {
-	let logs = member.guild.fetchAuditLogs({ type: 22 }).catch(error => { utils.ConsoleMessage(error) });
-	let entry = logs.entries.first();
+	let logs = member.guild.fetchAuditLogs({ type: 22 }).then(function () {
+		let entry = logs.entries.first();
 
-	setTimeout(function () {
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
 			if (err) ConsoleMessage(error)
 			if (rows[0] != undefined) {
@@ -227,8 +223,8 @@ client.on("guildBanAdd", function (guild, member) {
 					}
 				}
 			}
-		}, 250)
-	})
+		})
+	}).catch(error => { utils.ConsoleMessage(error) });
 })
 // #endregion
 

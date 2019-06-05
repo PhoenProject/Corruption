@@ -137,7 +137,7 @@ client.on("guildMemberAdd", member => {
 });
 client.on("guildMemberRemove", member => {
 	setTimeout(function () {
-		let logs = member.guild.fetchAuditLogs({ type: 20 }).then(function () {
+		let logs = await member.guild.fetchAuditLogs({ type: 20 }).then(function () {
 			console.log(logs)
 			let entry = logs.entries.first();
 			sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
@@ -203,7 +203,7 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 });
 client.on("guildBanAdd", function (guild, member) {
 	setTimeout(function () {
-		let logs = member.guild.fetchAuditLogs({ type: 22 }).then(function () {
+		let logs = await member.guild.fetchAuditLogs({ type: 22 }).then(function () {
 			let entry = logs.entries.first();
 
 			sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {

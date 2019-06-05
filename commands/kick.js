@@ -10,6 +10,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
       let hArgs = "<user> <reason>"
       let desc = "Kicks a user from the server."
       let member = message.mentions.members.first();
+      let reason = args.slice(1).join(' ');
       if (message.member.roles.find(role => role.id === rows[0].ModRole) || message.member.roles.find(role => role.id === rows[0].AdminRole) || message.member.hasPermission("ADMINISTRATOR")) {
         let member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
         if (!member) return utils.Embed(message, cmdused, perm, desc, hArgs, sqlcon);
@@ -29,9 +30,6 @@ module.exports.run = async (client, message, args, sqlcon) => {
           else if (reason === "")
             return message.channel.send("You need to state a reason!")
           else {
-            let reason = args.slice(1).join(' ');
-            if (!reason) reason = "No reason provided";
-
             member.send(`You have been kicked from ${message.guild.name} for ${reason}`)
             setTimeout(function () {
               member.kick(reason).catch(error => { utils.CatchError(message, error, cmdused) });

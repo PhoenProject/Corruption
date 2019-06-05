@@ -137,7 +137,7 @@ client.on("guildMemberAdd", member => {
 });
 client.on("guildMemberRemove", member => {
 	let logs = member.guild.fetchAuditLogs({ type: 20 }).then(function () {
-
+		console.log(logs)
 		let entry = logs.entries.first();
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
 			if (err) ConsoleMessage(error)
@@ -341,7 +341,7 @@ client.on("error", error => {
 		.setColor('#e450f4')
 		.setTimestamp()
 		.setFooter("Error report for Corruption Bot")
-		.addField("Error", error.message);
+		.addField("Error", error.content);
 	if (!error.message.includes("ECONNRESET")) { client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send("<@&538368441929826304>") }
 	client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send(errorembed)
 });

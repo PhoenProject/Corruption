@@ -23,7 +23,7 @@ client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
 
 fs.readdir("./commands/", (err, files) => {
-	if (err) ConsoleMessage(error)
+	if (err) ConsoleMessage(error, client)
 	let jsfile = files.filter(f => f.split(".").pop() === "js");
 	if (jsfile.length <= 0) {
 		console.log(`Couldn't find commands.`);
@@ -48,7 +48,7 @@ var sqlcon = mysql.createConnection({
 	charset: 'utf8mb4'
 });
 sqlcon.connect(err => {
-	if (err) ConsoleMessage(error)
+	if (err) ConsoleMessage(error, client)
 	console.log("Connected To Database");
 })
 sqlcon.on('error', error => {
@@ -119,14 +119,14 @@ client.on("guildCreate", guild => {
 });
 client.on("guildDelete", guild => {
 	let cmessage = `I have been removed from: ${guild.name} (id: ${guild.id})`;
-	ConsoleMessage(error)
+	ConsoleMessage(error, client)
 });
 // #endregion
 
 // #region Guild member events
 client.on("guildMemberAdd", member => {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-		if (err) ConsoleMessage(error)
+		if (err) ConsoleMessage(error, client)
 		if (rows[0].MemLog === 'true') {
 			let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
 			if (mlogchannel) { AddGuildMember(member, mlogchannel) }
@@ -140,7 +140,7 @@ client.on("guildMemberRemove", member => {
 		console.log(logs)
 		let entry = logs.entries.first();
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-			if (err) ConsoleMessage(error)
+			if (err) ConsoleMessage(error, client)
 			if (rows[0] != undefined) {
 				if (rows[0].MemLog === 'true') {
 					let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
@@ -177,11 +177,11 @@ client.on("guildMemberRemove", member => {
 				}
 			}
 		})
-	}).catch(error => { utils.ConsoleMessage(error) });
+	}).catch(error => { utils.ConsoleMessage(error, client) });
 });
 client.on("guildMemberUpdate", function (oldMem, newMem) {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${oldMem.guild.id}'`, (err, rows) => {
-		if (err) ConsoleMessage(error)
+		if (err) ConsoleMessage(error, client)
 		if (rows[0] != undefined) {
 			if (rows[0].MemLog === 'true' && oldMem.nickname != newMem.nickname) {
 				let mlogchannel = oldMem.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
@@ -204,7 +204,7 @@ client.on("guildBanAdd", function (guild, member) {
 		let entry = logs.entries.first();
 
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-			if (err) ConsoleMessage(error)
+			if (err) ConsoleMessage(error, client)
 			if (rows[0] != undefined) {
 				if (entry != undefined) {
 					let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
@@ -224,7 +224,7 @@ client.on("guildBanAdd", function (guild, member) {
 				}
 			}
 		})
-	}).catch(error => { utils.ConsoleMessage(error) });
+	}).catch(error => { utils.ConsoleMessage(error, client) });
 })
 // #endregion
 
@@ -233,11 +233,11 @@ client.on("guildBanAdd", function (guild, member) {
 client.on("messageDelete", async message => {
 	if (!message.guild) return
 	else {
-		let logs = await message.guild.fetchAuditLogs({ type: 72 }).catch(error => { utils.ConsoleMessage(error) });
+		let logs = await message.guild.fetchAuditLogs({ type: 72 }).catch(error => { utils.ConsoleMessage(error, client) });
 		let entry = logs.entries.first();
 
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-			if (err) ConsoleMessage(error)
+			if (err) ConsoleMessage(error, client)
 			if (message.mentions.members.first() != undefined && message.mentions.users.first().id != message.author.id
 				&& !message.mentions.users.first().bot && entry.createdTimestamp < (Date.now() - 5000)) {
 				message.channel.send(`Damn son, ${message.author} ghost pinged ${message.mentions.members.first()}`)
@@ -251,7 +251,7 @@ client.on("messageUpdate", function (oldMSG, newMSG) {
 	if ((!oldMSG.guild || !oldMSG.channel) || (oldMSG.content === newMSG.content)) return
 	else if (oldMSG.guild && oldMSG.channel.type != "dm") {
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${oldMSG.guild.id}'`, (err, rows) => {
-			if (err) ConsoleMessage(error)
+			if (err) ConsoleMessage(error, client)
 			if (rows[0].MsgLog === 'true') {
 				if (oldMSG != newMSG && oldMSG != null && newMSG != null && !newMSG.author.bot && (oldMSG.member != null && !newMSG.member != null)) {
 					let mlogchannel = oldMSG.guild.channels.find((channel => channel.id === rows[0].MsgLogChan));
@@ -358,10 +358,10 @@ function MessageCheck(message, sqlguild, sqlcon) {
 	}
 	else {
 		sqlcon.query(`SELECT * FROM chanprefs WHERE GuildID = '${message.guild.id}' AND ChannelID = '${message.channel.id}'`, (err, sqlchannelcreate) => {
-			if (err) ConsoleMessage(error)
+			if (err) ConsoleMessage(error, client)
 			if (sqlchannelcreate.length < 1) { CreateChanPrefs(message, sqlcon) }
 			sqlcon.query(`SELECT * FROM chanprefs WHERE GuildID = '${message.guild.id}' AND ChannelID = '${message.channel.id}'`, (err, sqlchannel) => {
-				if (err) ConsoleMessage(error)
+				if (err) ConsoleMessage(error, client)
 				if (!message.content.startsWith(sqlguild[0].Prefix)) {
 					if (sqlchannel[0].MsgVote === 'true') { MsgVoteChan(message, sqlcon, sqlguild) }
 					if (message.guild.id === "582850539604279296" && message.channel.id === "582858846519820298") {
@@ -627,11 +627,11 @@ function Reloadcommand(message) {
 		message.channel.send("Reloading the command modules files now. Please wait...")
 		modulelist = "";
 		fs.readdir("./commands/", (err, files) => {
-			if (err) ConsoleMessage(error)
+			if (err) ConsoleMessage(error, client)
 			let jsfile = files.filter(f => f.split(".").pop() === "js");
 			if (jsfile.length <= 0) {
 				let cmessage = "Couldn't find commands.";
-				ConsoleMessage(error)
+				ConsoleMessage(error, client)
 			}
 			jsfile.forEach((f, i) => {
 				delete require.cache[require.resolve(`./commands/${f}`)];
@@ -651,7 +651,7 @@ function Reloadcommand(message) {
 				.setTimestamp()
 				.addField("Loaded commands:", `${modulelist}`)
 			let cmessage = `The bot commands have been reloaded.\n${modulelist}`;
-			utils.ConsoleMessage(error)
+			utils.ConsoleMessage(error, client)
 
 			message.channel.send(reload)
 		});
@@ -666,7 +666,7 @@ function Help(message, rows) {
 		let InfoCMDs = ''
 		let gPrefix = rows[0].Prefix
 
-		if (err) ConsoleMessage(error)
+		if (err) ConsoleMessage(error, client)
 		if (files.length < 1) return console.log("No files could be found!")
 		let cmdFiles = files.filter(f => f.split(".").pop() === "js");
 		cmdFiles.forEach((f, i) => {

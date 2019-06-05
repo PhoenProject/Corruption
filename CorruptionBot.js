@@ -140,43 +140,45 @@ client.on("guildMemberRemove", member => {
 	let logs = member.guild.fetchAuditLogs({ type: 20 }).catch(error => { utils.ConsoleMessage(error) });
 	let entry = logs.entries.first();
 
-	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-		if (err) ConsoleMessage(error)
-		if (rows[0] != undefined) {
-			if (rows[0].MemLog === 'true') {
-				let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
-				if (mlogchannel) {
-					let Bot = member.guild.members.get(member => member.id === client.user.id)
-					const sInfo = new Discord.RichEmbed()
-						.setDescription(member + " **has left the guild**")
-						.setAuthor(`${member.displayName}`)
-						.setColor(member.displayHexColor)
-						.setFooter(`User ID: ${member.id}`)
-						.setTimestamp()
-						.setThumbnail(member.user.avatarURL)
-						.addField("Total members", `${member.guild.memberCount}`, true)
-					mlogchannel.send(sInfo)
+	setTimeout(function () {
+		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
+			if (err) ConsoleMessage(error)
+			if (rows[0] != undefined) {
+				if (rows[0].MemLog === 'true') {
+					let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
+					if (mlogchannel) {
+						let Bot = member.guild.members.get(member => member.id === client.user.id)
+						const sInfo = new Discord.RichEmbed()
+							.setDescription(member + " **has left the guild**")
+							.setAuthor(`${member.displayName}`)
+							.setColor(member.displayHexColor)
+							.setFooter(`User ID: ${member.id}`)
+							.setTimestamp()
+							.setThumbnail(member.user.avatarURL)
+							.addField("Total members", `${member.guild.memberCount}`, true)
+						mlogchannel.send(sInfo)
+					}
+					else if (!mlogchannel) { }
 				}
-				else if (!mlogchannel) { }
-			}
 
-			if (entry != undefined) {
-				let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
-				if (entry.createdTimestamp > (Date.now() - 5000)) {
-					let muteEmbed = new Discord.RichEmbed()
-						.setAuthor(`${member.user.tag} has been kicked`, member.user.avatarURL)
-						.setColor(member.displayHexColor)
-						.setFooter(`UserID: ${member.user.id}`)
-						.setTimestamp()
-						.setThumbnail(member.user.avatarURL)
-						.addField(`Kick:`,
-							`Kicked by ${entry.getResponsibleUser()}`
-							+ `\n**Time of kick:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-							+ `\nReason: ${entry.getReason().orElse("No reason given!")}`);
-					warnchannel.send(muteEmbed)
+				if (entry != undefined) {
+					let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
+					if (entry.createdTimestamp > (Date.now() - 5000)) {
+						let muteEmbed = new Discord.RichEmbed()
+							.setAuthor(`${member.user.tag} has been kicked`, member.user.avatarURL)
+							.setColor(member.displayHexColor)
+							.setFooter(`UserID: ${member.user.id}`)
+							.setTimestamp()
+							.setThumbnail(member.user.avatarURL)
+							.addField(`Kick:`,
+								`Kicked by ${entry.getResponsibleUser()}`
+								+ `\n**Time of kick:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
+								+ `\nReason: ${entry.getReason().orElse("No reason given!")}`);
+						warnchannel.send(muteEmbed)
+					}
 				}
 			}
-		}
+		}, 250)
 	})
 });
 client.on("guildMemberUpdate", function (oldMem, newMem) {
@@ -200,29 +202,31 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 	})
 });
 client.on("guildBanAdd", function (guild, member) {
-	let logs = member.guild.fetchAuditLogs({ type: 20 }).catch(error => { utils.ConsoleMessage(error) });
+	let logs = member.guild.fetchAuditLogs({ type: 22 }).catch(error => { utils.ConsoleMessage(error) });
 	let entry = logs.entries.first();
 
-	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-		if (err) ConsoleMessage(error)
-		if (rows[0] != undefined) {
-			if (entry != undefined) {
-				let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
-				if (entry.createdTimestamp > (Date.now() - 5000)) {
-					let muteEmbed = new Discord.RichEmbed()
-						.setAuthor(`${member.user.tag} has been banned`, member.user.avatarURL)
-						.setColor(member.displayHexColor)
-						.setFooter(`UserID: ${member.user.id}`)
-						.setTimestamp()
-						.setThumbnail(member.user.avatarURL)
-						.addField(`Ban:`,
-							`Banned by ${entry.getResponsibleUser()}`
-							+ `\n**Time of ban:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-							+ `\nReason: ${entry.getReason().orElse("No reason given!")}`);
-					warnchannel.send(muteEmbed)
+	setTimeout(function () {
+		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
+			if (err) ConsoleMessage(error)
+			if (rows[0] != undefined) {
+				if (entry != undefined) {
+					let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
+					if (entry.createdTimestamp > (Date.now() - 5000)) {
+						let muteEmbed = new Discord.RichEmbed()
+							.setAuthor(`${member.user.tag} has been banned`, member.user.avatarURL)
+							.setColor(member.displayHexColor)
+							.setFooter(`UserID: ${member.user.id}`)
+							.setTimestamp()
+							.setThumbnail(member.user.avatarURL)
+							.addField(`Ban:`,
+								`Banned by ${entry.getResponsibleUser()}`
+								+ `\n**Time of ban:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
+								+ `\nReason: ${entry.getReason().orElse("No reason given!")}`);
+						warnchannel.send(muteEmbed)
+					}
 				}
 			}
-		}
+		}, 250)
 	})
 })
 // #endregion

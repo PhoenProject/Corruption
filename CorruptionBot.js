@@ -135,7 +135,7 @@ client.on("guildMemberAdd", member => {
 		if (rows[0].AntiRaid === '1') { AntiRaid(member) }
 	})
 });
-client.on("guildMemberRemove", member => {
+client.on("guildMemberRemove", async member => {
 	setTimeout(function () {
 		let logs = await member.guild.fetchAuditLogs({ type: 20 }).then(function () {
 			console.log(logs)
@@ -201,7 +201,7 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 		}
 	})
 });
-client.on("guildBanAdd", function (guild, member) {
+client.on("guildBanAdd", async function (guild, member) {
 	setTimeout(function () {
 		let logs = await member.guild.fetchAuditLogs({ type: 22 }).then(function () {
 			let entry = logs.entries.first();

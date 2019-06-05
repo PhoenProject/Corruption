@@ -137,7 +137,7 @@ client.on("guildMemberAdd", member => {
 });
 client.on("guildMemberRemove", member => {
 
-	let logs = await message.guild.fetchAuditLogs({ type: 20 }).catch(error => { utils.ConsoleMessage(error) });
+	let logs = message.guild.fetchAuditLogs({ type: 20 }).catch(error => { utils.ConsoleMessage(error) });
 	let entry = logs.entries.first();
 
 	if (message.mentions.members.first() != undefined && message.mentions.users.first().id != message.author.id
@@ -203,7 +203,7 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 	})
 });
 client.on("guildBanAdd", function (guild, member) {
-	let logs = await message.guild.fetchAuditLogs({ type: 22 }).catch(error => { utils.ConsoleMessage(error) });
+	let logs = message.guild.fetchAuditLogs({ type: 22 }).catch(error => { utils.ConsoleMessage(error) });
 	let entry = logs.entries.first();
 
 	if (message.mentions.members.first() != undefined && message.mentions.users.first().id != message.author.id

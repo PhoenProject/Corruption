@@ -463,6 +463,9 @@ function MessageCheck(message, sqlguild, sqlcon) {
 						case "setup":
 							sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, prefix) => { Setup(message, prefix) })
 							break;
+						case "eval":
+							Eval(message)
+							break;
 						default:
 							if (commandfile) commandfile.run(client, message, args, sqlcon);
 							break;
@@ -798,11 +801,11 @@ function Eval(message) {
 		try {
 			const code = args.join(" ");
 			let evaled = eval(code);
-	   
+
 			if (typeof evaled !== "string")
-			  evaled = require("util").inspect(evaled);
-	   
-			message.channel.send(clean(evaled), {code:"xl"});
+				evaled = require("util").inspect(evaled);
+
+			message.channel.send(clean(evaled), { code: "xl" });
 		}
 		catch (error) { utils.CatchError(message, error, cmdused) }
 	}

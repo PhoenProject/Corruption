@@ -30,11 +30,24 @@ module.exports.run = async (client, message, args, sqlcon) => {
           else if (reason === "")
             return message.channel.send("You need to state a reason!")
           else {
-            member.send(`You have been kicked from ${message.guild.name} for ${reason}`)
-            setTimeout(function () {
-              member.kick(reason).then(message.channel.send(`That user has been kicked from the server!`))
-                .catch(error => { utils.CatchError(message, error, cmdused) });
-            }, 500)
+            let warnchannel = message.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
+            if (warnchannel != null) {
+              let muteEmbed = new Discord.RichEmbed()
+                .setAuthor(`You have been kicked from ${message.guild.name}`, member.user.avatarURL)
+                .setColor(member.displayHexColor)
+                .setFooter(`UserID: ${member.user.id}`)
+                .setTimestamp()
+                .setThumbnail(member.user.avatarURL)
+                .addField(`Kick:`,
+                  `Kicked by ${message.author}`
+                  + `\n**Time of kick:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
+                  + `\nReason: ${reason}`);
+              member.send(muteEmbed)
+              setTimeout(function () {
+                member.kick(reason).then(message.channel.send(`${member} has been kicked!`))
+                  .catch(error => { utils.CatchError(message, error, cmdused) });
+              }, 500)
+            }
           }
         }
       }

@@ -136,27 +136,51 @@ client.on("guildMemberAdd", member => {
 	})
 });
 client.on("guildMemberRemove", member => {
-	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-		if (err) ConsoleMessage(error)
-		if (rows[0] != undefined) {
-			if (rows[0].MemLog === 'true') {
-				let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
-				if (mlogchannel) {
-					let Bot = member.guild.members.get(member => member.id === client.user.id)
-					const sInfo = new Discord.RichEmbed()
-						.setDescription(member + " **has left the guild**")
-						.setAuthor(`${member.displayName}`)
-						.setColor(member.displayHexColor)
-						.setFooter(`User ID: ${member.id}`)
-						.setTimestamp()
-						.setThumbnail(member.user.avatarURL)
-						.addField("Total members", `${member.guild.memberCount}`, true)
-					mlogchannel.send(sInfo)
+
+	let logs = await message.guild.fetchAuditLogs({ type: 20 }).catch(error => { utils.ConsoleMessage(error) });
+	let entry = logs.entries.first();
+
+	if (message.mentions.members.first() != undefined && message.mentions.users.first().id != message.author.id
+		&& !message.mentions.users.first().bot && entry.createdTimestamp < (Date.now() - 5000)) {
+		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
+			if (err) ConsoleMessage(error)
+			if (rows[0] != undefined) {
+				if (rows[0].MemLog === 'true') {
+					let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
+					if (mlogchannel) {
+						let Bot = member.guild.members.get(member => member.id === client.user.id)
+						const sInfo = new Discord.RichEmbed()
+							.setDescription(member + " **has left the guild**")
+							.setAuthor(`${member.displayName}`)
+							.setColor(member.displayHexColor)
+							.setFooter(`User ID: ${member.id}`)
+							.setTimestamp()
+							.setThumbnail(member.user.avatarURL)
+							.addField("Total members", `${member.guild.memberCount}`, true)
+						mlogchannel.send(sInfo)
+					}
+					else if (!mlogchannel) { }
 				}
-				else if (!mlogchannel) { }
+
+				if (entry != undefined) {
+					let warnchannel = message.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
+					if (entry.createdTimestamp > (Date.now() - 5000)) {
+						let muteEmbed = new Discord.RichEmbed()
+							.setAuthor(`${member.user.tag} has been kicked`, member.user.avatarURL)
+							.setColor(member.displayHexColor)
+							.setFooter(`UserID: ${member.user.id}`)
+							.setTimestamp()
+							.setThumbnail(member.user.avatarURL)
+							.addField(`Kick:`,
+								`Kicked by ${message.author}`
+								+ `\n**Time of kick:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`);
+						warnchannel.send(muteEmbed)
+					}
+				}
+
 			}
-		}
-	})
+		})
+	}
 });
 client.on("guildMemberUpdate", function (oldMem, newMem) {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${oldMem.guild.id}'`, (err, rows) => {
@@ -179,6 +203,7 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 	})
 });
 // #endregion
+
 
 // #region Message events
 client.on("messageDelete", async message => {

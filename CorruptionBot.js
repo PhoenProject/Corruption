@@ -135,51 +135,51 @@ client.on("guildMemberAdd", member => {
 		if (rows[0].AntiRaid === '1') { AntiRaid(member) }
 	})
 });
-client.on("guildMemberRemove", async member => {
-	setTimeout(function () {
-		let logs = await member.guild.fetchAuditLogs({ type: 20 }).then(function () {
-			console.log(logs)
-			let entry = logs.entries.first();
-			sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-				if (err) ConsoleMessage(error, client)
-				if (rows[0] != undefined) {
-					if (rows[0].MemLog === 'true') {
-						let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
-						if (mlogchannel) {
-							let Bot = member.guild.members.get(member => member.id === client.user.id)
-							const sInfo = new Discord.RichEmbed()
-								.setDescription(member + " **has left the guild**")
-								.setAuthor(`${member.displayName}`)
-								.setColor(member.displayHexColor)
-								.setFooter(`User ID: ${member.id}`)
-								.setTimestamp()
-								.setThumbnail(member.user.avatarURL)
-								.addField("Total members", `${member.guild.memberCount}`, true)
-							mlogchannel.send(sInfo)
-						}
-						else if (!mlogchannel) { }
+client.on("guildMemberRemove", async (member) => {
+	let logs = await member.guild.fetchAuditLogs({ type: 20, limit: 1 }).catch(error => { utils.ConsoleMessage(error, client) });
+	setTimeout(() => {
+		let entry = logs.entries.first();
+		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
+			if (err) ConsoleMessage(error, client)
+			if (rows[0] != undefined) {
+				if (rows[0].MemLog === 'true') {
+					let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
+					if (mlogchannel) {
+						let Bot = member.guild.members.get(member => member.id === client.user.id)
+						const sInfo = new Discord.RichEmbed()
+							.setDescription(member + " **has left the guild**")
+							.setAuthor(`${member.displayName}`)
+							.setColor(member.displayHexColor)
+							.setFooter(`User ID: ${member.id}`)
+							.setTimestamp()
+							.setThumbnail(member.user.avatarURL)
+							.addField("Total members", `${member.guild.memberCount}`, true)
+						mlogchannel.send(sInfo)
 					}
+					else if (!mlogchannel) { }
+				}
 
-					if (entry != undefined) {
-						let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
-						if (entry.createdTimestamp > (Date.now() - 5000)) {
-							let muteEmbed = new Discord.RichEmbed()
-								.setAuthor(`${member.user.tag} has been kicked`, member.user.avatarURL)
-								.setColor(member.displayHexColor)
-								.setFooter(`UserID: ${member.user.id}`)
-								.setTimestamp()
-								.setThumbnail(member.user.avatarURL)
-								.addField(`Kick:`,
-									`Kicked by ${entry.getResponsibleUser()}`
-									+ `\n**Time of kick:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-									+ `\nReason: ${entry.getReason().orElse("No reason given!")}`);
-							warnchannel.send(muteEmbed)
-						}
+				if (entry != undefined) {
+					let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
+					if (entry.createdTimestamp > (Date.now() - 5000)) {
+						let Reason = entry.reason
+						if(!entry.reason) Reason = "No reason given!"
+						let muteEmbed = new Discord.RichEmbed()
+							.setAuthor(`${member.user.tag} has been kicked`, member.user.avatarURL)
+							.setColor(member.displayHexColor)
+							.setFooter(`UserID: ${member.user.id}`)
+							.setTimestamp()
+							.setThumbnail(member.user.avatarURL)
+							.addField(`Kick:`,
+								`Kicked by ${entry.executor}`
+								+ `\n**Time of kick:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
+								+ `\nReason: ${Reason}`);
+						warnchannel.send(muteEmbed)
 					}
 				}
-			})
-		}).catch(error => { utils.ConsoleMessage(error, client) });
-	}, 250)
+			}
+		})
+	}, 500)
 });
 client.on("guildMemberUpdate", function (oldMem, newMem) {
 	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${oldMem.guild.id}'`, (err, rows) => {
@@ -201,34 +201,34 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 		}
 	})
 });
-client.on("guildBanAdd", async function (guild, member) {
-	setTimeout(function () {
-		let logs = await member.guild.fetchAuditLogs({ type: 22 }).then(function () {
-			let entry = logs.entries.first();
-
-			sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-				if (err) ConsoleMessage(error, client)
-				if (rows[0] != undefined) {
-					if (entry != undefined) {
-						let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
-						if (entry.createdTimestamp > (Date.now() - 5000)) {
-							let muteEmbed = new Discord.RichEmbed()
-								.setAuthor(`${member.user.tag} has been banned`, member.user.avatarURL)
-								.setColor(member.displayHexColor)
-								.setFooter(`UserID: ${member.user.id}`)
-								.setTimestamp()
-								.setThumbnail(member.user.avatarURL)
-								.addField(`Ban:`,
-									`Banned by ${entry.getResponsibleUser()}`
-									+ `\n**Time of ban:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-									+ `\nReason: ${entry.getReason().orElse("No reason given!")}`);
-							warnchannel.send(muteEmbed)
-						}
+client.on("guildBanAdd", async function (guild, user) {
+	let logs = await guild.fetchAuditLogs({ type: 22, limit: 1 }).catch(error => { utils.ConsoleMessage(error, client) });
+	setTimeout(() => {
+		let entry = logs.entries.first();
+		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${guild.id}'`, (err, rows) => {
+			if (err) ConsoleMessage(error, client)
+			if (rows[0] != undefined) {
+				if (entry != undefined) {
+					let warnchannel = guild.channels.find((channel => channel.id === rows[0].ModLogchan));
+					if (entry.createdTimestamp > (Date.now() - 5000)) {
+						let Reason = entry.reason
+						if(!entry.reason) Reason = "No reason given!"
+						let muteEmbed = new Discord.RichEmbed()
+							.setAuthor(`${user.username}#${user.discriminator} has been banned`, user.avatarURL)
+							.setColor(user.displayHexColor)
+							.setFooter(`UserID: ${user.id}`)
+							.setTimestamp()
+							.setThumbnail(user.avatarURL)
+							.addField(`Ban:`,
+								`Banned by ${entry.executor}`
+								+ `\n**Time of ban:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
+								+ `\nReason: ${Reason}`);
+						warnchannel.send(muteEmbed)
 					}
 				}
-			})
-		}).catch(error => { utils.ConsoleMessage(error, client) });
-	}, 250)
+			}
+		})
+	}, 500)
 })
 // #endregion
 

@@ -138,6 +138,7 @@ client.on("guildMemberAdd", member => {
 client.on("guildMemberRemove", member => {
 
 	let logs = member.guild.fetchAuditLogs({ type: 20 }).catch(error => { utils.ConsoleMessage(error) });
+	console.log(logs)
 	let entry = logs.entries.first();
 
 	setTimeout(function () {

@@ -32,9 +32,8 @@ module.exports.run = async (client, message, args, sqlcon) => {
           else {
             member.send(`You have been kicked from ${message.guild.name} for ${reason}`)
             setTimeout(function () {
-              member.kick(reason).catch(error => { utils.CatchError(message, error, cmdused) });
-
-              message.channel.send(`That user has been kicked from the server!`)
+              member.kick(reason).then(message.channel.send(`That user has been kicked from the server!`))
+                .catch(error => { utils.CatchError(message, error, cmdused) });
             }, 500)
           }
         }

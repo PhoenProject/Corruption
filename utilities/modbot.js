@@ -13,7 +13,7 @@ var statssqlcon = mysql.createConnection({
     charset: 'utf8mb4'
 });
 statssqlcon.connect(err => {
-    if (err) utils.ConsoleMessage(err, client)
+    if (err) console.log(err)
     console.log("Connected To Database");
 })
 statssqlcon.on('error', error => {

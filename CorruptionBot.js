@@ -23,7 +23,7 @@ client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
 
 fs.readdir("./commands/", (err, files) => {
-	if (err) ConsoleMessage(error, client)
+	if (err) console.log(err)
 	let jsfile = files.filter(f => f.split(".").pop() === "js");
 	if (jsfile.length <= 0) {
 		console.log(`Couldn't find commands.`);
@@ -48,7 +48,7 @@ var sqlcon = mysql.createConnection({
 	charset: 'utf8mb4'
 });
 sqlcon.connect(err => {
-	if (err) ConsoleMessage(error, client)
+	if (err) console.log(err)
 	console.log("Connected To Database");
 })
 sqlcon.on('error', error => {
@@ -401,12 +401,6 @@ function MessageCheck(message, sqlguild, sqlcon) {
 								break;
 							case "offduty":
 								dscp.offduty(client, message, MsgContent)
-								break;
-							case "tester":
-								dscp.test(client, message, MsgContent)
-								break;
-							case "nsfw":
-								dscp.nsfw(client, message, MsgContent)
 								break;
 							case "stats":
 								stats.main(client, message)

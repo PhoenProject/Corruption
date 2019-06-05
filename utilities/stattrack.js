@@ -16,7 +16,7 @@ var sqlcon = mysql.createConnection({
     charset: 'utf8mb4'
 });
 sqlcon.connect(err => {
-    if (err) utils.ConsoleMessage(err, client)
+    if (err) console.log(err)
     console.log("Connected To Database");
 })
 sqlcon.on('error', error => {

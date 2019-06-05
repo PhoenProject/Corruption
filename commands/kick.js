@@ -10,24 +10,36 @@ module.exports.run = async (client, message, args, sqlcon) => {
       let hArgs = "<user> <reason>"
       let desc = "Kicks a user from the server."
       let member = message.mentions.members.first();
-      if (member.roles.find(role => role.id === rows[0].ModRole) || member.roles.find(role => role.id === rows[0].AdminRole) || member.hasPermission("ADMINISTRATOR") || !member)
-        return utils.Embed(message, cmdused, perm, desc, hArgs, sqlcon);
-      else if (member.hasPermission(perm)) {
-        message.channel.send("I am unable to let you kick this user!")
-      }
-      else if (!member.kickable) {
-        return message.reply("I'm sorry, i can't let you do that...\nMake sure i have the required permissions")
-      }
-      else {
-        let reason = args.slice(1).join(' ');
-        if (!reason) reason = "No reason provided";
+      if (message.member.roles.find(role => role.id === rows[0].ModRole) || message.member.roles.find(role => role.id === rows[0].AdminRole) || message.member.hasPermission("ADMINISTRATOR")) {
+        let member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
+        if (!member) return utils.Embed(message, cmdused, perm, desc, hArgs, sqlcon);
+        else {
+          if (member.id === client.user.id)
+            message.channel.send("**REEEE!**")
+          else if (member == null || member == undefined)
+            return message.channel.send("That member could not be found!");
+          else if (member.user.bot)
+            return message.channel.send("You can not kick bots!");
+          else if (member.id === message.author.id)
+            return message.channel.send("You can not kick yourself!");
+          else if (member.highestRole.position > message.member.highestRole.position)
+            return message.channel.send("That user is higher than you, so i am unable to let you kick them!");
+          else if (member.highestRole.position == message.member.highestRole.position)
+            return message.channel.send("That user is same rank as you, so i am unable to let you kick them!");
+          else if (reason === "")
+            return message.channel.send("You need to state a reason!")
+          else {
+            let reason = args.slice(1).join(' ');
+            if (!reason) reason = "No reason provided";
 
-        member.send(`You have been kicked from ${message.guild.name} for ${reason}`)
-        setTimeout(function () {
-          member.kick(reason).catch(error => { utils.CatchError(message, error, cmdused) });
+            member.send(`You have been kicked from ${message.guild.name} for ${reason}`)
+            setTimeout(function () {
+              member.kick(reason).catch(error => { utils.CatchError(message, error, cmdused) });
 
-          message.channel.send(`That user has been kicked from the server!`)
-        }, 500)
+              message.channel.send(`That user has been kicked from the server!`)
+            }, 500)
+          }
+        }
       }
     }
   })

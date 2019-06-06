@@ -138,7 +138,7 @@ client.on("guildMemberAdd", member => {
 client.on("guildMemberRemove", async (member) => {
 	let logs = await member.guild.fetchAuditLogs({ type: 20, limit: 1 }).catch(error => { utils.ConsoleMessage(error, client) });
 	setTimeout(() => {
-		let entry = logs.entries.first();
+		if (logs != undefined) let entry = logs.entries.first();
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
 			if (err) ConsoleMessage(error, client)
 			if (rows[0] != undefined) {
@@ -159,11 +159,11 @@ client.on("guildMemberRemove", async (member) => {
 					else if (!mlogchannel) { }
 				}
 
-				if (entry != undefined) {
+				if (logs != undefined && entry != undefined) {
 					let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
 					if (entry.createdTimestamp > (Date.now() - 5000)) {
 						let Reason = entry.reason
-						if(!entry.reason) Reason = "No reason given!"
+						if (!entry.reason) Reason = "No reason given!"
 						let muteEmbed = new Discord.RichEmbed()
 							.setAuthor(`${member.user.tag} has been kicked`, member.user.avatarURL)
 							.setColor(member.displayHexColor)
@@ -212,7 +212,7 @@ client.on("guildBanAdd", async function (guild, user) {
 					let warnchannel = guild.channels.find((channel => channel.id === rows[0].ModLogchan));
 					if (entry.createdTimestamp > (Date.now() - 5000)) {
 						let Reason = entry.reason
-						if(!entry.reason) Reason = "No reason given!"
+						if (!entry.reason) Reason = "No reason given!"
 						let muteEmbed = new Discord.RichEmbed()
 							.setAuthor(`${user.username}#${user.discriminator} has been banned`, user.avatarURL)
 							.setColor(user.displayHexColor)

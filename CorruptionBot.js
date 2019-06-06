@@ -138,7 +138,8 @@ client.on("guildMemberAdd", member => {
 client.on("guildMemberRemove", async (member) => {
 	let logs = await member.guild.fetchAuditLogs({ type: 20, limit: 1 }).catch(error => { utils.ConsoleMessage(error, client) });
 	setTimeout(() => {
-		if (logs != undefined) let entry = logs.entries.first();
+		let entry
+		if (logs != undefined) entry = logs.entries.first();
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
 			if (err) ConsoleMessage(error, client)
 			if (rows[0] != undefined) {

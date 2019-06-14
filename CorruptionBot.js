@@ -136,7 +136,7 @@ client.on("guildMemberAdd", member => {
 	})
 });
 client.on("guildMemberRemove", async (member) => {
-	let logs = await member.guild.fetchAuditLogs({ type: 20, limit: 1 }).catch(error => { utils.ConsoleMessage(error, client) });
+	let logs = await member.guild.fetchAuditLogs({ type: 20, limit: 1 }).catch(O_o => { });
 	setTimeout(() => {
 		let entry
 		if (logs != undefined) entry = logs.entries.first();
@@ -203,7 +203,7 @@ client.on("guildMemberUpdate", function (oldMem, newMem) {
 	})
 });
 client.on("guildBanAdd", async function (guild, user) {
-	let logs = await guild.fetchAuditLogs({ type: 22, limit: 1 }).catch(error => { utils.ConsoleMessage(error, client) });
+	let logs = await guild.fetchAuditLogs({ type: 22, limit: 1 }).catch(O_o => { });
 	setTimeout(() => {
 		let entry = logs.entries.first();
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${guild.id}'`, (err, rows) => {
@@ -238,7 +238,7 @@ client.on("guildBanAdd", async function (guild, user) {
 client.on("messageDelete", async message => {
 	if (!message.guild) return
 	else {
-		let logs = await message.guild.fetchAuditLogs({ type: 72 }).catch(error => { utils.ConsoleMessage(error, client) });
+		let logs = await message.guild.fetchAuditLogs({ type: 72 }).catch(O_o => { });
 		let entry = logs.entries.first();
 
 		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
@@ -357,6 +357,11 @@ client.on('reconnecting', () => console.log('I am reconnecting now!'));
 // #region Functions
 //#region Handle Message
 function MessageCheck(message, sqlguild, sqlcon) {
+
+	if(!message.author.bot && message.member.mentions.first().id === "124241068727336963"){
+		message.channel.send(message.author + " **REEEEEEEEEEEEEE!**")
+	}
+
 	if (sqlguild.length < 1) {
 		let guild = message.guild
 		CreateGuildPrefs(guild, sqlcon)
@@ -472,7 +477,7 @@ function MessageCheck(message, sqlguild, sqlcon) {
 }
 // #endregion
 
-//#region /MySQL data creation
+//#region MySQL data creation
 function CreateGuildPrefs(guild, sqlcon) {
 	let strTest = guild.name.replace(/[^0-9a-z]/gi, '')
 	let GuildName = strTest.replace(/'/g, '~');

@@ -358,7 +358,7 @@ client.on('reconnecting', () => console.log('I am reconnecting now!'));
 //#region Handle Message
 function MessageCheck(message, sqlguild, sqlcon) {
 
-	if(!message.author.bot && message.member.mentions.first().id === "124241068727336963"){
+	if(!message.author.bot && message.member.mentions != undefined && message.member.mentions.first().id === "124241068727336963"){
 		message.channel.send(message.author + " **REEEEEEEEEEEEEE!**")
 	}
 

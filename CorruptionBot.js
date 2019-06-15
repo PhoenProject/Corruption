@@ -7,6 +7,7 @@ const dscp = require('./utilities/dscpcmds.js');
 const autow = require('./utilities/autowarning.js');
 const mbot = require('./utilities/modbot.js');
 const stats = require('./utilities/stattrack.js');
+const watcher = require('./utilities/watcher.js');
 const moment = require("moment");
 const shell = require('shelljs');
 const fs = require("fs");
@@ -358,11 +359,6 @@ client.on('reconnecting', () => console.log('I am reconnecting now!'));
 //#region Handle Message
 function MessageCheck(message, sqlguild, sqlcon) {
 
-	if(!message.author.bot && message.member.mentions != undefined){
-		console.log(message.member.mentions.first().id)
-		message.channel.send(message.author + " **REEEEEEEEEEEEEE!**")
-	}
-
 	if (sqlguild.length < 1) {
 		let guild = message.guild
 		CreateGuildPrefs(guild, sqlcon)
@@ -426,6 +422,7 @@ function MessageCheck(message, sqlguild, sqlcon) {
 								break;
 						}
 					}
+					else if(message.guild.id === "446745542740148244") watcher.watcher(client, message);
 					switch (cmd) {
 						case "heartofcorruption":
 						case "devserver":

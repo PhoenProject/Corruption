@@ -33,7 +33,7 @@ watchcon.on('error', error => {
 
 module.exports.watcher = (client, message) => {
     let mArgs = message.content.split(' ');
-    if (mArgs[1] === "?wadd") {
+    if (mArgs[0] === "?wadd") {
         var mAuthor = message.author;
         var mAuthorName = message.author.name.replace(/'/g, '');
         var IP = mArgs[1].replace(/'/g, "");

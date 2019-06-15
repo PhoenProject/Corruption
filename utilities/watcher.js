@@ -34,13 +34,12 @@ watchcon.on('error', error => {
 module.exports.watcher = (client, message) => {
     let mArgs = message.content.split(' ');
     if (mArgs[1] === "?wadd") {
-        let mAuthor = message.author;
-        let mAuthorName = message.author.name.replace(/'/g, '');
-        let mArgs = message.content.split(' ');
-        let IP = mArgs[1].replace(/'/g, "");
+        var mAuthor = message.author;
+        var mAuthorName = message.author.name.replace(/'/g, '');
+        var IP = mArgs[1].replace(/'/g, "");
 
         if (!args[2]) return message.reply("you need to state a reason >:(")
-        else let Reason = mArgs.slice(2).join(' ');
+        else var Reason = mArgs.slice(2).join(' ');
 
         watchcon.query(`INSERT INTO hackers (Value, Reason, AddedBy) VALUES ('${IP}', '${Reason}', '${mAuthorName}')`);
         setTimeout(function () {
@@ -49,7 +48,7 @@ module.exports.watcher = (client, message) => {
                 else if(!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
                 else {
                     message.channel.send("User ||" + IP + "|| was sucessfully added to the database!");
-                    message.delete()l
+                    message.delete();
                 }
             })
         }, 300)

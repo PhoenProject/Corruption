@@ -38,8 +38,6 @@ module.exports.watcher = (client, message) => {
             if (!mArgs[1]) return message.reply("you need to state an IP >:(");
             if (!mArgs[2]) return message.reply("you need to state a reason >:(");
 
-            var IP = mArgs[1].replace(/'/g, "");
-
             watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
                 if (err) return message.channel.send("There was an error adding that user to the database! " + err);
                 else if (!rows || rows.length < 1) AddUser(message, IP, watchcon, mArgs)
@@ -84,7 +82,7 @@ function AddUser(message, IP, watchcon, mArgs) {
         watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
             if (err) return message.channel.send("There was an error adding that user to the database! " + err);
             else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
-            else message.channel.send("User ||" + IP + "|| was sucessfully added to the database!");
+            else message.channel.send(`User ${IP} was sucessfully added to the database!`);
         })
     }, 300)
 }
@@ -95,7 +93,7 @@ function RemoveUser(message, IP, watchcon) {
     setTimeout(function () {
         watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
             if (err) return message.channel.send("There was an error adding that user to the database! " + err);
-            else if (!rows || rows.length < 1) message.channel.send("User ||" + IP + "|| was sucessfully removed from the database!");
+            else if (!rows || rows.length < 1) message.channel.send(`User ${IP} was sucessfully removed from the database!`);
             else return message.channel.send("I encountered an error when validating the removal!\nGo ree at <@124241068727336963>");
         })
     }, 300)
@@ -112,7 +110,7 @@ function UpdateUser(message, IP, watchcon, mArgs) {
         watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
             if (err) return message.channel.send("There was an error updating that user on the database! " + err);
             else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
-            else message.channel.send("User ||" + IP + "|| was sucessfully updated!");
+            else message.channel.send(`User ${IP} was sucessfully updated!`);
         })
     }, 300)
 }

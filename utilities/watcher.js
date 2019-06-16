@@ -34,81 +34,238 @@ watchcon.on('error', error => {
 module.exports.watcher = (client, message) => {
     if (message.member.roles.find(role => role.id === "567167097373720598") || message.member.hasPermission("ADMINISTRATOR")) {
         let mArgs = message.content.split(' ');
-        if (mArgs[0] === "?wadd") {
-            if (!mArgs[1]) return message.reply("you need to state an IP >:(");
-            if (!mArgs[2]) return message.reply("you need to state a reason >:(");
+        let mName = message.author.username.replace(/'/g, '');
+        let Value = mArgs[1].replace(/'/g, "");
+        if (!mArgs[1]) return message.reply("you need to state an IP >:(");
 
-            watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
-                if (err) return message.channel.send("There was an error adding that user to the database! " + err);
-                else if (!rows || rows.length < 1) AddUser(message, IP, watchcon, mArgs)
-                else return message.reply("that user already exists in the database. Perhaps try `?wupdate` instead...");
-            })
-        }
-        else if (mArgs[0] === "?wremove") {
-            if (!mArgs[1]) return message.reply("you need to state an IP >:(");
-
-            var IP = mArgs[1].replace(/'/g, "");
-            watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
-                if (err) return message.channel.send("There was an error removing that user to the database! " + err);
-                else if (!rows || rows.length < 1) message.reply("that user does not exist in the database!");
-                else RemoveUser(message, IP, watchcon)
-            })
-        }
-        else if (mArgs[0] === "?wupdate") {
-            if (!mArgs[1]) return message.reply("you need to state an IP >:(");
-            if (!mArgs[2]) return message.reply("you need to state a reason >:(");
-
-            watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
-                if (err) return message.channel.send("There was an error removing that user to the database! " + err);
-                else if (!rows || rows.length < 1) message.reply("that user does not exist in the database!");
-                else UpdateUser(message, IP, watchcon, mArgs)
-            })
+        switch (mArgs[1]) {
+            case "?widadd":
+                AddUID(message, mArgs, mName, Value);
+                break;
+            case "?wgipadd":
+                AddGameIP(message, mArgs, mName, Value);
+                break;
+            case "?wauthadd":
+                AddAuthIP(message, mArgs, mName, Value);
+                break;
+            case "?widdel":
+                DelUID(message, mArgs, mName, Value);
+                break;
+            case "?wgipdel":
+                DelGameIP(message, mArgs, mName, Value);
+                break;
+            case "?wauthdel":
+                DelAuthIP(message, mArgs, mName, Value);
+                break;
+            case "?widupdate":
+                UpdateUID(message, mArgs, mName, Value);
+                break;
+            case "?wgipupdate":
+                UpdateGameIP(message, mArgs, mName, Value);
+                break;
+            case "?wauthupdate":
+                UpdateAuthIP(message, mArgs, mName, Value);
+                break;
+            default:
+                break;
         }
     }
 }
 
-function AddUser(message, IP, watchcon, mArgs) {
-    var mAuthor = message.author;
-    var mAuthorName = message.author.username.replace(/'/g, '');
-    var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
+function AddUID(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, check) => {
+        if (check.rows < 1) {
+            if (!mArgs[2]) return message.reply("you need to state a reason >:(");
+            var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
 
-    watchcon.query(`INSERT INTO hackers (Value, Reason, AddedBy) VALUES ('${IP}', '${Reason}', '${mAuthorName}')`);
-    setTimeout(function () {
-        watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
-            if (err) return message.channel.send("There was an error adding that user to the database! " + err);
-            else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
-            else message.channel.send(`User ||${IP}|| was sucessfully added to the database!`);
+            watchcon.query(`INSERT INTO uid (Value, Reason, AddedBy) VALUES ('${Value}', '${Reason}', '${mName}')`);
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, rows) => {
+                    if (err) return message.channel.send("There was an error adding that user to the database! " + err);
+                    else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
+                    else message.channel.send(`User ||${Value}|| was sucessfully added to the database!`);
+                    message.delete();
+                })
+            }, 300)
+        }
+        else {
+            message.channel.send("That user is already in the database");
             message.delete();
-        })
-    }, 300)
+        }
+    })
+}
+function AddGameIP(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, check) => {
+        if (check.rows < 1) {
+            if (!mArgs[2]) return message.reply("you need to state a reason >:(");
+            var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
+
+            watchcon.query(`INSERT INTO game_ip (Value, Reason, AddedBy) VALUES ('${Value}', '${Reason}', '${mName}')`);
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, rows) => {
+                    if (err) return message.channel.send("There was an error adding that user to the database! " + err);
+                    else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
+                    else message.channel.send(`User ||${Value}|| was sucessfully added to the database!`);
+                    message.delete();
+                })
+            }, 300)
+        }
+        else {
+            message.channel.send("That user is already in the database");
+            message.delete();
+        }
+    })
+}
+function AddAuthIP(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, check) => {
+        if (check.rows < 1) {
+            if (!mArgs[2]) return message.reply("you need to state a reason >:(");
+            var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
+
+            watchcon.query(`INSERT INTO auth_ip (Value, Reason, AddedBy) VALUES ('${Value}', '${Reason}', '${mName}')`);
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, rows) => {
+                    if (err) return message.channel.send("There was an error adding that user to the database! " + err);
+                    else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
+                    else message.channel.send(`User ||${Value}|| was sucessfully added to the database!`);
+                    message.delete();
+                })
+            }, 300)
+        }
+        else {
+            message.channel.send("That user is already in the database");
+            message.delete();
+        }
+    })
 }
 
-function RemoveUser(message, IP, watchcon) {
-    watchcon.query(`DELETE FROM hackers WHERE Value = '${IP}'`);
+function DelUID(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, check) => {
+        if (check.length > 1) {
+            watchcon.query(`DELETE FROM uid WHERE Value = '${Value}'`);
 
-    setTimeout(function () {
-        watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
-            if (err) return message.channel.send("There was an error adding that user to the database! " + err);
-            else if (!rows || rows.length < 1) message.channel.send(`User ||${IP}|| was sucessfully removed from the database!`);
-            else return message.channel.send("I encountered an error when validating the removal!\nGo ree at <@124241068727336963>");
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, rows) => {
+                    if (err) return message.channel.send("There was an error adding that user to the database! " + err);
+                    else if (!rows || rows.length < 1) message.channel.send(`User ||${Value}|| was sucessfully removed from the database!`);
+                    else return message.channel.send("I encountered an error when validating the removal!\nGo ree at <@124241068727336963>");
+                    message.delete();
+                })
+            }, 300)
+        }
+        else {
+            message.channel.send("That user does not exist in the database");
             message.delete();
-        })
-    }, 300)
+        }
+    })
+}
+function DelGameIP(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, check) => {
+        if (check.length > 1) {
+            watchcon.query(`DELETE FROM game_ip WHERE Value = '${Value}'`);
+
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, rows) => {
+                    if (err) return message.channel.send("There was an error adding that user to the database! " + err);
+                    else if (!rows || rows.length < 1) message.channel.send(`User ||${Value}|| was sucessfully removed from the database!`);
+                    else return message.channel.send("I encountered an error when validating the removal!\nGo ree at <@124241068727336963>");
+                    message.delete();
+                })
+            }, 300)
+        }
+        else {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+    })
+}
+function DelAuthIP(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, check) => {
+        if (check.length > 1) {
+            watchcon.query(`DELETE FROM auth_ip WHERE Value = '${Value}'`);
+
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, rows) => {
+                    if (err) return message.channel.send("There was an error adding that user to the database! " + err);
+                    else if (!rows || rows.length < 1) message.channel.send(`User ||${Value}|| was sucessfully removed from the database!`);
+                    else return message.channel.send("I encountered an error when validating the removal!\nGo ree at <@124241068727336963>");
+                    message.delete();
+                })
+            }, 300)
+        }
+        else {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+    })
 }
 
-function UpdateUser(message, IP, watchcon, mArgs) {
-    var mAuthor = message.author;
-    var mAuthorName = message.author.username.replace(/'/g, '');
-    var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
+function UpdateUID(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, check) => {
+        if (check.length > 1) {
+            if (!mArgs[2]) return message.reply("you need to state a reason >:(");
+            var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
 
-    watchcon.query(`UPDATE hackers SET Reason = '${Reason}' WHERE Value = '${IP}'`);
+            watchcon.query(`UPDATE uid SET Reason = '${Reason}' WHERE Value = '${Value}'`);
 
-    setTimeout(function () {
-        watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
-            if (err) return message.channel.send("There was an error updating that user on the database! " + err);
-            else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
-            else message.channel.send(`User ||${IP}|| was sucessfully updated!`);
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, rows) => {
+                    if (err) return message.channel.send("There was an error updating that user on the database! " + err);
+                    else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
+                    else message.channel.send(`User ||${Value}|| was sucessfully updated!`);
+                    message.delete();
+                })
+            }, 300)
+        }
+        else {
+            message.channel.send("That user does not exist in the database");
             message.delete();
-        })
-    }, 300)
+        }
+    })
+}
+function UpdateGameIP(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, check) => {
+        if (check.length > 1) {
+            if (!mArgs[2]) return message.reply("you need to state a reason >:(");
+            var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
+
+            watchcon.query(`UPDATE game_ip SET Reason = '${Reason}' WHERE Value = '${Value}'`);
+
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, rows) => {
+                    if (err) return message.channel.send("There was an error updating that user on the database! " + err);
+                    else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
+                    else message.channel.send(`User ||${Value}|| was sucessfully updated!`);
+                    message.delete();
+                })
+            }, 300)
+        }
+        else {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+    })
+}
+function UpdateAuthIP(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, check) => {
+        if (check.length > 1) {
+            if (!mArgs[2]) return message.reply("you need to state a reason >:(");
+            var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
+
+            watchcon.query(`UPDATE auth_ip SET Reason = '${Reason}' WHERE Value = '${Value}'`);
+
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, rows) => {
+                    if (err) return message.channel.send("There was an error updating that user on the database! " + err);
+                    else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
+                    else message.channel.send(`User ||${Value}|| was sucessfully updated!`);
+                    message.delete();
+                })
+            }, 300)
+        }
+        else {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+    })
 }

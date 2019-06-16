@@ -1,6 +1,8 @@
+const discord = require("discord.js");
 const mysql = require("mysql");
 const config = require("../config.json");
 const fetch = require("node-fetch");
+const moment = require("moment");
 
 var watchcon = mysql.createConnection({
     host: config.WatchHost,
@@ -63,6 +65,16 @@ module.exports.watcher = (client, message) => {
                 case "?wauthupdate":
                     UpdateAuthIP(message, mArgs, mName, Value);
                     break;
+                case "?widinfo":
+                    InfoUID(message, mArgs, mName, Value)
+                    break;
+                case "?wgipinfo":
+                    InfoGameIP(message, mArgs, mName, Value)
+                    break;
+                case "?wauthinfo":
+                    InfoAuthIP(message, mArgs, mName, Value)
+                    break;
+
                 default:
                     break;
             }
@@ -306,6 +318,87 @@ function UpdateAuthIP(message, mArgs, mName, Value) {
                     })
                 }, 300)
             }
+        }
+    })
+}
+
+function InfoUID(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, check) => {
+        if (!check || check.length < 1) {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+        else {
+            fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${config.SteamAIPKey}&steamids=${Value}`)
+                .then(res => res.json())
+                .then(json => {
+
+                    let infoEmbed = new discord.RichEmbed()
+                        .setThumbnail(json.response.players[0].avatarfull);
+                    if (json.response.players[0].communityvisibilitystate == 1 || json.response.players[0].communityvisibilitystate == 2) {
+                        infoEmbed.setColor(`#800000`);
+                        infoEmbed.setDescription(`User has set their profile to private!`);
+
+                        infoEmbed.addField(`Steam Data:`, `${json.response.players[0].personaname}`
+                        + `\nTime created: Private`
+                        + `\nLast logged off: Private`);
+                    }
+                    else {
+                        infoEmbed.addField(`Steam Data:`, `${json.response.players[0].personaname}`
+                        + `\nTime created: ${moment.unix(json.response.players[0].timecreated).format("MM/DD/YYYY")}`
+                        + `\nLast logged off: ${moment.unix(json.response.players[0].lastlogoff).format("MM/DD/YYYY")}`);
+
+                        if (json.response.players[0].gameid != undefined) {
+                            infoEmbed.setColor(`#7da10e`);
+                            infoEmbed.setDescription(`Currently ingame: ` + json.response.players[0].gameextrainfo);
+                        }
+                        else if (json.response.players[0].personastate) {
+                            infoEmbed.setColor(`#00adee`);
+                        }
+                    }
+
+                    //infoEmbed.setColor("#003a6c");
+                    infoEmbed.setTitle(`Information for SteamID ${Value}`);
+                    infoEmbed.setFooter(`Added By: ${check[0].AddedBy}`);
+                    //infoEmbed.addField(`SteamID`, Value);
+                    infoEmbed.addField(`Reason`, check[0].Reason);
+
+                    message.channel.send(infoEmbed);
+                })
+        }
+    })
+}
+function InfoGameIP(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, check) => {
+        if (!check || check.length < 1) {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+        else {
+            let infoEmbed = new discord.RichEmbed()
+                .setColor("#003a6c")
+                .setTitle(`Information for Game IP ${Value}`)
+                .setFooter(`Added By: ${check[0].AddedBy}`)
+                //.addField(`Game IP`, Value)
+                .addField(`Reason`, check[0].Reason);
+            message.channel.send(infoEmbed);
+        }
+    })
+}
+function InfoAuthIP(message, mArgs, mName, Value) {
+    watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, check) => {
+        if (!check || check.length < 1) {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+        else {
+            let infoEmbed = new discord.RichEmbed()
+                .setColor("#003a6c")
+                .setTitle(`Information for Request IP ${Value}`)
+                .setFooter(`Added By: ${check[0].AddedBy}`)
+                //.addField(`Auth IP`, Value)
+                .addField(`Reason`, check[0].Reason);
+            message.channel.send(infoEmbed);
         }
     })
 }

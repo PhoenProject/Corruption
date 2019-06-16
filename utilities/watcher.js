@@ -48,9 +48,6 @@ module.exports.watcher = (client, message) => {
             if (!mArgs[1]) return message.reply("you need to state an IP >:(");
 
             var IP = mArgs[1].replace(/'/g, "");
-
-            message.channel.send(IP);
-
             watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
                 if (err) return message.channel.send("There was an error removing that user to the database! " + err);
                 else if (!rows || rows.length < 1) message.reply("that user does not exist in the database!");
@@ -60,8 +57,6 @@ module.exports.watcher = (client, message) => {
         else if (mArgs[0] === "?wupdate") {
             if (!mArgs[1]) return message.reply("you need to state an IP >:(");
             if (!mArgs[2]) return message.reply("you need to state a reason >:(");
-
-            var IP = mArgs[1].replace(/'/g, "");
 
             watchcon.query(`SELECT * FROM hackers WHERE Value = '${IP}'`, (err, rows) => {
                 if (err) return message.channel.send("There was an error removing that user to the database! " + err);

@@ -422,7 +422,7 @@ function MessageCheck(message, sqlguild, sqlcon) {
 								break;
 						}
 					}
-					else if(message.guild.id === "446745542740148244") watcher.watcher(client, message);
+					else if(message.guild.id === "499352093019209741") watcher.watcher(client, message);
 					switch (cmd) {
 						case "heartofcorruption":
 						case "devserver":

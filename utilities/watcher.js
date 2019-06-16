@@ -38,7 +38,7 @@ module.exports.watcher = (client, message) => {
         let Value = mArgs[1].replace(/'/g, "");
         if (!mArgs[1]) return message.reply("you need to state an IP >:(");
 
-        switch (mArgs[1]) {
+        switch (mArgs[0]) {
             case "?widadd":
                 AddUID(message, mArgs, mName, Value);
                 break;
@@ -74,7 +74,7 @@ module.exports.watcher = (client, message) => {
 
 function AddUID(message, mArgs, mName, Value) {
     watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, check) => {
-        if (check.rows < 1) {
+        if (!check || check.length < 1) {
             if (!mArgs[2]) return message.reply("you need to state a reason >:(");
             var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
 
@@ -96,7 +96,7 @@ function AddUID(message, mArgs, mName, Value) {
 }
 function AddGameIP(message, mArgs, mName, Value) {
     watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, check) => {
-        if (check.rows < 1) {
+        if (!check || check.length < 1) {
             if (!mArgs[2]) return message.reply("you need to state a reason >:(");
             var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
 
@@ -118,7 +118,7 @@ function AddGameIP(message, mArgs, mName, Value) {
 }
 function AddAuthIP(message, mArgs, mName, Value) {
     watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, check) => {
-        if (check.rows < 1) {
+        if (!check || check.length < 1) {
             if (!mArgs[2]) return message.reply("you need to state a reason >:(");
             var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
 
@@ -141,7 +141,11 @@ function AddAuthIP(message, mArgs, mName, Value) {
 
 function DelUID(message, mArgs, mName, Value) {
     watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, check) => {
-        if (check.length > 1) {
+        if (!check || check.length < 1) {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+        else {
             watchcon.query(`DELETE FROM uid WHERE Value = '${Value}'`);
 
             setTimeout(function () {
@@ -153,15 +157,15 @@ function DelUID(message, mArgs, mName, Value) {
                 })
             }, 300)
         }
-        else {
-            message.channel.send("That user does not exist in the database");
-            message.delete();
-        }
     })
 }
 function DelGameIP(message, mArgs, mName, Value) {
     watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, check) => {
-        if (check.length > 1) {
+        if (!check || check.length < 1) {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+        else {
             watchcon.query(`DELETE FROM game_ip WHERE Value = '${Value}'`);
 
             setTimeout(function () {
@@ -173,15 +177,15 @@ function DelGameIP(message, mArgs, mName, Value) {
                 })
             }, 300)
         }
-        else {
-            message.channel.send("That user does not exist in the database");
-            message.delete();
-        }
     })
 }
 function DelAuthIP(message, mArgs, mName, Value) {
     watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, check) => {
-        if (check.length > 1) {
+        if (!check || check.length < 1) {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+        else {
             watchcon.query(`DELETE FROM auth_ip WHERE Value = '${Value}'`);
 
             setTimeout(function () {
@@ -193,16 +197,16 @@ function DelAuthIP(message, mArgs, mName, Value) {
                 })
             }, 300)
         }
-        else {
-            message.channel.send("That user does not exist in the database");
-            message.delete();
-        }
     })
 }
 
 function UpdateUID(message, mArgs, mName, Value) {
     watchcon.query(`SELECT * FROM uid WHERE Value = '${Value}'`, (err, check) => {
-        if (check.length > 1) {
+        if (!check || check.length < 1) {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+        else {
             if (!mArgs[2]) return message.reply("you need to state a reason >:(");
             var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
 
@@ -217,15 +221,15 @@ function UpdateUID(message, mArgs, mName, Value) {
                 })
             }, 300)
         }
-        else {
-            message.channel.send("That user does not exist in the database");
-            message.delete();
-        }
     })
 }
 function UpdateGameIP(message, mArgs, mName, Value) {
     watchcon.query(`SELECT * FROM game_ip WHERE Value = '${Value}'`, (err, check) => {
-        if (check.length > 1) {
+        if (!check || check.length < 1) {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+        else {
             if (!mArgs[2]) return message.reply("you need to state a reason >:(");
             var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
 
@@ -240,15 +244,15 @@ function UpdateGameIP(message, mArgs, mName, Value) {
                 })
             }, 300)
         }
-        else {
-            message.channel.send("That user does not exist in the database");
-            message.delete();
-        }
     })
 }
 function UpdateAuthIP(message, mArgs, mName, Value) {
     watchcon.query(`SELECT * FROM auth_ip WHERE Value = '${Value}'`, (err, check) => {
-        if (check.length > 1) {
+        if (!check || check.length < 1) {
+            message.channel.send("That user does not exist in the database");
+            message.delete();
+        }
+        else {
             if (!mArgs[2]) return message.reply("you need to state a reason >:(");
             var Reason = mArgs.slice(2).join(' ').replace(/'/g, "");
 
@@ -262,10 +266,6 @@ function UpdateAuthIP(message, mArgs, mName, Value) {
                     message.delete();
                 })
             }, 300)
-        }
-        else {
-            message.channel.send("That user does not exist in the database");
-            message.delete();
         }
     })
 }

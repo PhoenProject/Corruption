@@ -30,8 +30,8 @@ watchcon.on('error', error => {
 module.exports.watcher = (client, message) => {
     if (message.member.roles.find(role => role.id === "567167097373720598") || message.member.hasPermission("ADMINISTRATOR")) {
         let mArgs = message.content.split(' ');
-        let mName = message.author.username.replace(/'/g, '');
-        let Value = mArgs[1].replace(/'/g, "");
+        let mName = message.author.username;
+        let Value = mArgs[1];
         if (!mArgs[1]) {
             message.reply("you need to state an IP >:(");
             message.delete();

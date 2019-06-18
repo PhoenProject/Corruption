@@ -32,7 +32,7 @@ module.exports.watcher = (client, message) => {
         let mArgs = message.content.split(' ');
         let mName = message.author.username;
         let Value = mArgs[1];
-        if (!mArgs[1]) {
+        if (message.content.startsWith("?w") && !mArgs[1]) {
             message.reply("you need to state an IP >:(");
             message.delete();
         }

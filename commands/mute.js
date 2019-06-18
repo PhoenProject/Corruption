@@ -3,12 +3,12 @@ const utils = require('../utilities/utils.js');
 const bot = require('../CorruptionBot.js')
 const moment = require("moment");
 
-function JokeMute(client, message, mRole, Member) {
+function JokeMute(client, message, mRole) {
   if (!mRole) return message.channel.send("REEEEE");
   let role = message.guild.roles.find(role => role.name === "Muted");
-  Member.addRole(role).catch(error => { message.channel.send("REEEEE"); });
+  message.member.addRole(role).catch(error => { message.channel.send("REEEEE"); });
   setTimeout(function () {
-    Member.removeRole(mRole).catch(error => { message.channel.send("Erm, this is awkward...\nI am unable to remove the muted role!"); });
+    message.member.removeRole(mRole).catch(error => { message.channel.send("Erm, this is awkward...\nI am unable to remove the muted role!"); });
     message.reply("maybe you'll think twice next time you try to mute me...");
   }, 10000)
 }
@@ -24,7 +24,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
       let Member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
       let mRole = message.guild.roles.find(role => role.name === "Muted")
       if (Member.id === client.user.id)
-        JokeMute(client, message, mRole, Member)
+        JokeMute(client, message, mRole)
       else if (Member == null || Member == undefined)
         return message.channel.send("That member could not be found!");
       else if (Member.user.bot)

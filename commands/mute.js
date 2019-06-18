@@ -3,7 +3,7 @@ const utils = require('../utilities/utils.js');
 const bot = require('../CorruptionBot.js')
 const moment = require("moment");
 
-function JokeMute(client, message, mRole) {
+function JokeMute(client, message, mRole, Member) {
   if (!mRole) return message.channel.send("REEEEE");
   let role = message.guild.roles.find(role => role.name === "Muted");
   Member.addRole(role).catch(error => { message.channel.send("REEEEE"); });
@@ -24,7 +24,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
       let Member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
       let mRole = message.guild.roles.find(role => role.name === "Muted")
       if (member.id === client.user.id)
-        JokeMute(client, message, mRole)
+        JokeMute(client, message, mRole, Member)
       else if (Member == null || Member == undefined)
         return message.channel.send("That member could not be found!");
       else if (Member.user.bot)

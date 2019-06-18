@@ -23,7 +23,7 @@ module.exports.run = async (client, message, args, sqlcon) => {
       let desc = "Mutes a user on the server, preventing them from sending messages and adding reactions.";
       let Member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
       let mRole = message.guild.roles.find(role => role.name === "Muted")
-      if (member.id === client.user.id)
+      if (Member.id === client.user.id)
         JokeMute(client, message, mRole, Member)
       else if (Member == null || Member == undefined)
         return message.channel.send("That member could not be found!");

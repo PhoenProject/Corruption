@@ -8,14 +8,11 @@ const autow = require('./utilities/autowarning.js');
 const mbot = require('./utilities/modbot.js');
 const stats = require('./utilities/stattrack.js');
 const watcher = require('./utilities/watcher.js');
+const logs = require('./utilities/loggingsystem.js');
 const moment = require("moment");
-const shell = require('shelljs');
 const fs = require("fs");
 const mysql = require("mysql");
 const { exec } = require("child_process");
-const { inspect } = require('util');
-const SteamAPI = require('steamapi');
-const steam = new SteamAPI(config.SteamAIPKey);
 
 // #region Connection and data stuffs
 
@@ -126,159 +123,32 @@ client.on("guildDelete", guild => {
 
 // #region Guild member events
 client.on("guildMemberAdd", member => {
-	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-		if (err) ConsoleMessage(error, client)
-		if (rows[0].MemLog === 'true') {
-			let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
-			if (mlogchannel) { AddGuildMember(member, mlogchannel) }
-			else if (!mlogchannel) { }
-		}
-		if (rows[0].AntiRaid === '1') { AntiRaid(member) }
-	})
+	if (!member.bot || !member.guild) return;
+	logs.MemberAdd(client, member, sqlcon);
 });
 client.on("guildMemberRemove", async (member) => {
-	let logs = await member.guild.fetchAuditLogs({ type: 20, limit: 1 }).catch(O_o => { });
-	setTimeout(() => {
-		let entry
-		if (logs != undefined) entry = logs.entries.first();
-		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${member.guild.id}'`, (err, rows) => {
-			if (err) ConsoleMessage(error, client)
-			if (rows[0] != undefined) {
-				if (rows[0].MemLog === 'true') {
-					let mlogchannel = member.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
-					if (mlogchannel) {
-						let Bot = member.guild.members.get(member => member.id === client.user.id)
-						const sInfo = new Discord.RichEmbed()
-							.setDescription(member + " **has left the guild**")
-							.setAuthor(`${member.displayName}`)
-							.setColor(member.displayHexColor)
-							.setFooter(`User ID: ${member.id}`)
-							.setTimestamp()
-							.setThumbnail(member.user.avatarURL)
-							.addField("Total members", `${member.guild.memberCount}`, true)
-						mlogchannel.send(sInfo)
-					}
-					else if (!mlogchannel) { }
-				}
-
-				if (logs != undefined && entry != undefined) {
-					let warnchannel = member.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
-					if (entry.createdTimestamp > (Date.now() - 5000)) {
-						let Reason = entry.reason
-						if (!entry.reason) Reason = "No reason given!"
-						let muteEmbed = new Discord.RichEmbed()
-							.setAuthor(`${member.user.tag} has been kicked`, member.user.avatarURL)
-							.setColor(member.displayHexColor)
-							.setFooter(`UserID: ${member.user.id}`)
-							.setTimestamp()
-							.setThumbnail(member.user.avatarURL)
-							.addField(`Kick:`,
-								`Kicked by ${entry.executor}`
-								+ `\n**Time of kick:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-								+ `\nReason: ${Reason}`);
-						warnchannel.send(muteEmbed)
-					}
-				}
-			}
-		})
-	}, 500)
+	if (!member.bot || !member.guild) return;
+	logs.MemberRemove(client, member, sqlcon);
 });
 client.on("guildMemberUpdate", function (oldMem, newMem) {
-	sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${oldMem.guild.id}'`, (err, rows) => {
-		if (err) ConsoleMessage(error, client)
-		if (rows[0] != undefined) {
-			if (rows[0].MemLog === 'true' && oldMem.nickname != newMem.nickname) {
-				let mlogchannel = oldMem.guild.channels.find((channel => channel.id === rows[0].MemLogChan));
-				let member = oldMem.user
-				const sInfo = new Discord.RichEmbed()
-					.setAuthor(`${member.tag} - Nickname Updated`, oldMem.user.avatarURL)
-					.setColor(oldMem.displayHexColor)
-					.setTimestamp()
-				if (oldMem.nickname === null) sInfo.addField("Old nickname", "None")
-				else sInfo.addField("Old nickname", oldMem.nickname)
-				if (newMem.nickname === null) sInfo.addField("New nickname", "None")
-				else sInfo.addField("New nickname", newMem.nickname)
-				mlogchannel.send(sInfo).catch(O_o => { });
-			}
-		}
-	})
+	if (!oldMem.bot || !oldMem.guild || !oldMem || !newMem) return;
+	logs.MemberUpdate(client, oldMem, newMem, sqlcon);
 });
 client.on("guildBanAdd", async function (guild, user) {
-	let logs = await guild.fetchAuditLogs({ type: 22, limit: 1 }).catch(O_o => { });
-	setTimeout(() => {
-		let entry = logs.entries.first();
-		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${guild.id}'`, (err, rows) => {
-			if (err) ConsoleMessage(error, client)
-			if (rows[0] != undefined) {
-				if (entry != undefined) {
-					let warnchannel = guild.channels.find((channel => channel.id === rows[0].ModLogchan));
-					if (entry.createdTimestamp > (Date.now() - 5000)) {
-						let Reason = entry.reason
-						if (!entry.reason) Reason = "No reason given!"
-						let muteEmbed = new Discord.RichEmbed()
-							.setAuthor(`${user.username}#${user.discriminator} has been banned`, user.avatarURL)
-							.setColor(user.displayHexColor)
-							.setFooter(`UserID: ${user.id}`)
-							.setTimestamp()
-							.setThumbnail(user.avatarURL)
-							.addField(`Ban:`,
-								`Banned by ${entry.executor}`
-								+ `\n**Time of ban:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-								+ `\nReason: ${Reason}`);
-						warnchannel.send(muteEmbed)
-					}
-				}
-			}
-		})
-	}, 500)
+	if (!member.bot || !member.guild) return;
+	logs.AddBan(client, member, sqlcon);
 })
 // #endregion
 
 
 // #region Message events
 client.on("messageDelete", async message => {
-	if (!message.guild) return
-	else {
-		let logs = await message.guild.fetchAuditLogs({ type: 72 }).catch(O_o => { });
-		let entry = logs.entries.first();
-
-		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-			if (err) ConsoleMessage(error, client)
-			if (message.mentions.members.first() != undefined && message.mentions.users.first().id != message.author.id
-				&& !message.mentions.users.first().bot && entry.createdTimestamp < (Date.now() - 5000)) {
-				message.channel.send(`Damn son, ${message.author} ghost pinged ${message.mentions.members.first()}`)
-			}
-
-			MessageDelete(message, entry, rows)
-		})
-	}
+	if (message.guild == null || message.author.bot) return;
+	logs.MessageDeleted(client, message, sqlcon);
 });
 client.on("messageUpdate", function (oldMSG, newMSG) {
-	if ((!oldMSG.guild || !oldMSG.channel) || (oldMSG.content === newMSG.content)) return
-	else if (oldMSG.guild && oldMSG.channel.type != "dm") {
-		sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${oldMSG.guild.id}'`, (err, rows) => {
-			if (err) ConsoleMessage(error, client)
-			if (rows[0].MsgLog === 'true') {
-				if (oldMSG != newMSG && oldMSG != null && newMSG != null && !newMSG.author.bot && (oldMSG.member != null && !newMSG.member != null)) {
-					let mlogchannel = oldMSG.guild.channels.find((channel => channel.id === rows[0].MsgLogChan));
-					if (mlogchannel) {
-						if (newMSG === null) newMSG = "This message shouldn't be displayed!\nIf it is, then something has gone massively wrong!"
-						let color = oldMSG.member.displayHexColor
-						if (color === null) color = "#e450f4"
-						if (newMSG.toString().length > 1024) newMSG = newMSG.toString().slice(1023)
-						const sInfo = new Discord.RichEmbed()
-							.setAuthor(`${newMSG.member.tag} - Message Edited`, newMSG.author.avatarURL)
-							.setDescription(oldMSG)
-							.setColor(color)
-							.setTimestamp()
-							.addField("New message:", `${newMSG}`)
-							.addField("Channel", newMSG.channel)
-						mlogchannel.send(sInfo).catch(O_o => { });
-					}
-				}
-			}
-		})
-	}
+	if (oldMSG == newMSG || oldMSG == null || newMSG == null || oldMSG.author.bot || newMSG.author.bot || oldMSG.member == null || newMSG.member == null) return;
+	logs.MessageEdited(client, oldMSG, newMSG, sqlcon);
 });
 client.on("message", async message => {
 	let args = message.content.split(' ')
@@ -317,40 +187,9 @@ client.on("message", async message => {
 // #endregion
 
 // #region Misc. bot events
-client.on("debug", debug => {
-	try {
-		let Bot = client.guilds.find(guild => guild.id === "446745542740148244").members.find(member => member.id === client.user.id)
-		let debugembed = new Discord.RichEmbed()
-			.setAuthor('Corruption Developer log', client.user.avatarURL)
-			.setColor(Bot.displayHexColor)
-			.setTimestamp()
-			.setFooter("Debug for Corruption Bot")
-			.addField("Debug", debug);
-		client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send(debugembed)
-	}
-	catch { console.log(debug) }
-});
-client.on("warn", warn => {
-	let Bot = client.guilds.find(guild => guild.id === "446745542740148244").members.get(member => member.id === client.user.id)
-	let warnembed = new Discord.RichEmbed()
-		.setAuthor('Corruption Developer log', client.user.avatarURL)
-		.setColor(Bot.displayHexColor)
-		.setTimestamp()
-		.setFooter("Warning for Corruption Bot")
-		.addField("Warning", warn);
-	client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send(warnembed)
-});
-client.on("error", error => {
-	let Bot = client.guilds.find(guild => guild.id === "446745542740148244").members.get(member => member.id === client.user.id)
-	let errorembed = new Discord.RichEmbed()
-		.setAuthor('Corruption Developer log')
-		.setColor('#e450f4')
-		.setTimestamp()
-		.setFooter("Error report for Corruption Bot")
-		.addField("Error", error.content);
-	if (!error.message.includes("ECONNRESET")) { client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send("<@&538368441929826304>") }
-	client.guilds.find(guild => guild.id === "446745542740148244").channels.find(channel => channel.id === config.Logchan).send(errorembed)
-});
+client.on("debug", console.debug);
+client.on("warn", console.warn);
+client.on("error", console.error);
 client.on('disconnect', () => console.log('I just disconnected, making sure you know, I will reconnect now...'));
 client.on('reconnecting', () => console.log('I am reconnecting now!'));
 // #endregion
@@ -422,7 +261,7 @@ function MessageCheck(message, sqlguild, sqlcon) {
 								break;
 						}
 					}
-					else if(message.guild.id === "499352093019209741") watcher.watcher(client, message);
+					else if (message.guild.id === "499352093019209741") watcher.watcher(client, message);
 					switch (cmd) {
 						case "heartofcorruption":
 						case "devserver":
@@ -489,52 +328,6 @@ function CreateChanPrefs(message, sqlcon) {
 }
 // #endregion
 
-//#region Guild Member Functions
-function AddGuildMember(member, mlogchannel) {
-	let User = client.users.find(user => user.id === member.id);
-	var cdate = moment(new Date(User.createdAt));
-	let Guild = member.guild;
-	const sInfo = new Discord.RichEmbed()
-		.setAuthor(`${member.displayName}`)
-		.setDescription(member + " **has joined the guild**")
-		.setColor('#e450f4')
-		.setFooter(`User ID: ${member.id}`)
-		.setTimestamp()
-		.setThumbnail(member.user.avatarURL)
-		.addField("Total members", `${Guild.memberCount}`, true)
-		.addField("Creation Date:", `${cdate.format("MMMM Do YYYY HH:mm")}\n(${moment(cdate).fromNow()})`, true);
-	let ageS = moment(cdate).fromNow(true)
-	let ageA = ageS.split(" ");
-	if (ageS.includes("seconds") || ageA[1] === "minute" || ageA[1] === "minutes" || ageA[1] === "hour" || ageA[1] === "hours" || ageA[1] === "day" || ageA[1] === "days") {
-		if (!member.guild.roles.find(role => role.name === "Anti-Alt")) {
-			MakeAntiAlt(member);
-			setTimeout(function () {
-				if (!member.guild.roles.find(role => role.name === "Anti-Alt")) {
-					MakeAntiAlt(member);
-				}
-
-				setTimeout(function () {
-					sInfo.addField("WARNING!", "This account is less than 30 days old, so has been given the Anti-Alt role")
-					let Role = member.guild.roles.find(role => role.name === "Anti-Alt")
-					member.addRole(Role)
-					member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions.`)
-					mlogchannel.send(sInfo)
-				}, 300)
-
-			}, 300)
-		}
-		else {
-			sInfo.addField("WARNING!", "This account is less than 30 days old, so has been given the Anti-Alt role")
-			let Role = member.guild.roles.find(role => role.name === "Anti-Alt")
-			member.addRole(Role)
-			member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions.`)
-			mlogchannel.send(sInfo)
-		}
-	}
-	else {
-		mlogchannel.send(sInfo)
-	}
-}
 function AntiRaid(member) {
 	if (!member.guild.roles.find(role => role.name === "Anti-Raid")) {
 		member.guild.createRole({
@@ -566,33 +359,6 @@ function AntiRaid(member) {
 		member.addRole(role).catch(O_o => { });
 	}
 }
-// #endregion
-
-//#region Guild Message Functions
-function MessageDelete(message, entry, rows) {
-	let mlogchannel = message.guild.channels.find((channel => channel.id === rows[0].MsgLogChan));
-	if (mlogchannel != null) {
-		if (message.guild == null || message.author.bot) return;
-
-		if (message.member == null || message.member.displayHexColor == null) color = '#6fa1f2'
-		else color = message.member.displayHexColor
-		const sInfo = new Discord.RichEmbed()
-			.setAuthor(`${message.author.tag} - Deleted message`, message.author.avatarURL)
-			.setColor(color)
-			.setTimestamp()
-			.addField("Channel", message.channel, true);
-		if (entry != undefined) {
-			if (entry.createdTimestamp > (Date.now() - 5000)) sInfo.addField("Deleted By", entry.executor, true)
-		}
-		if (message.attachments.first() !== undefined) {
-			let aName = message.attachments.first().filename
-			sInfo.addField("Attatchment", aName, true)
-		}
-		if (message.content) sInfo.setDescription(message.content)
-		mlogchannel.send(sInfo).catch(O_o => { });
-	}
-}
-// #endregion
 
 //#region Chat Functions
 function PingMessage(message, PrefixCheck) {
@@ -808,35 +574,6 @@ function Eval(message) {
 		catch (error) { utils.CatchError(message, error, cmdused) }
 	}
 }
-// #endregion
-
-//#region Misc. functions
-function MakeAntiAlt(member) {
-	member.guild.createRole({
-		name: "Anti-Alt",
-		color: `#df6968`,
-		hoist: false,
-		position: 9,
-		permissions: [],
-		mentionable: false
-	}).catch(error => { return member.reply(`Sorry, i was unable to execute that command. ${error}`) });
-	setTimeout(function () {
-		let Guild = member.guild
-		let blarg = Guild.channels.filter(channel => channel.type === "text")
-		blarg.forEach(f => {
-			let mrole = member.guild.roles.find(role => role.name === "Anti-Alt").id
-			f.overwritePermissions(mrole, {
-				ATTACH_FILES: false,
-				EMBED_LINKS: false,
-				ADD_REACTIONS: false,
-				USE_EXTERNAL_EMOJIS: false,
-				CREATE_INSTANT_INVITE: false,
-			})
-		});
-	}, 300);
-}
-// #endregion
-
 // #endregion
 
 client.login(config.token);

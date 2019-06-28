@@ -42,7 +42,10 @@ module.exports.watcher = (client, message) => {
                 break;
             case "?wgipadd":
                 AddToDataBase(message, mArgs, mName, Value, "game_ip");
-                setTimeout(function () { AddToDataBase(message, mArgs, mName, Value, "auth_ip"); }, 150)
+                setTimeout(function () {
+                    message.channel.bulkDelete(1);
+                    AddToDataBase(message, mArgs, mName, Value, "auth_ip");
+                }, 150)
                 break;
             case "?wauthadd":
                 AddToDataBase(message, mArgs, mName, Value, "auth_ip");
@@ -96,7 +99,7 @@ module.exports.watcher = (client, message) => {
 }
 
 function AddToDataBase(message, mArgs, mName, Value, DB) {
-    message.delete();
+    message.delete().catch(O_o => { });
 
     if (!mArgs[1]) return message.reply("you need to state an IP/ID >:(");
     if (!mArgs[2]) return message.reply("you need to state a reason >:(");
@@ -104,21 +107,25 @@ function AddToDataBase(message, mArgs, mName, Value, DB) {
     let Reason = mArgs.slice(2).join(' ');
 
     //Checks if the data is valid
-    var isValid = CheckIsValid(Value, DB);
-    if (isValid != true) return message.channel.send(isValid);
+    let isvalid = CheckIsValid(Value, DB, function (isValid) {
 
-    //Checks if the data already exists in the database
-    var doesExist = CheckDB(Value, DB);
-    if (doesExist == true) return message.channel.send("That user already exists!");
+        if (isValid != true) return message.channel.send(isValid);
 
-    watchcon.query(`INSERT INTO ${DB} (Value, Reason, AddedBy) VALUES (?, ?, ?)`, [Value, Reason, mName]);
-    setTimeout(function () {
-        watchcon.query(`SELECT * FROM ${DB} WHERE Value = ?`, [Value], (err, rows) => {
-            if (err) return message.channel.send("There was an error adding that user to the database! " + err);
-            else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
-            else return message.channel.send(`Sucessfully added ||${Value}|| to the database!`);
+        //Checks if the data already exists in the database
+        let doesexist = CheckDB(Value, DB, function (doesExist) {
+            if (doesExist) return message.channel.send("That user already exists!");
+
+            watchcon.query(`INSERT INTO ${DB} (Value, Reason, AddedBy) VALUES (?, ?, ?)`, [Value, Reason, mName]);
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM ${DB} WHERE Value = ?`, [Value], (err, rows) => {
+                    if (err) return message.channel.send("There was an error adding that user to the database! " + err);
+                    else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the addition!\nGo ree at <@124241068727336963>");
+                    else return message.channel.send(`Sucessfully added ||${Value}|| to the database!`);
+                })
+            }, 300)
         })
-    }, 300)
+    })
+
 }
 function DelFromDataBase(message, mArgs, Value, DB) {
     message.delete();
@@ -215,25 +222,27 @@ function SendEmbed(message, Value, DB, DataObject) {
 }
 
 //#region General data functions
-function CheckIsValid(Value, DB) {
+function CheckIsValid(Value, DB, callback) {
     if (DB === "uid") {
-        fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${config.SteamAIPKey}&steamids=${Value}`)
+        let Result = fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${config.SteamAIPKey}&steamids=${Value}`)
             .then(res => res.json())
             .then(json => {
-                if (!JSON.stringify(json).includes(`,"communityvisibilitystate"`)) return "That is an invalid SteamID";
-                else return true
+                if (!JSON.stringify(json).includes(`,"communityvisibilitystate"`)) return callback("That is an invalid SteamID");
+                else return callback(true);
             })
     }
     else {
         var ipLookup = geoip.lookup(Value);
-        if (ipLookup == null) return "That is an invalid IP";
-        else return true
+        if (ipLookup == null) return callback("That is an invalid IP");
+        else return callback(true)
     }
+
+    return
 }
-function CheckDB(Value, DB) {
-    watchcon.query(`SELECT * FROM ${DB} WHERE Value = ?`, [Value], (err, check) => {
-        if (!check || check.length < 1) return false
-        else return true;
+function CheckDB(Value, DB, callback) {
+    watchcon.query(`SELECT * FROM ${DB} WHERE Value = ?`, [Value], function (err, check) {
+        if (!check || check.length < 1) return callback(false);
+        else return callback(true);
     })
 }
 function GetDBData(message, Value, DB, DataObject) {

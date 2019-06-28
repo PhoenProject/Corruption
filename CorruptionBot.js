@@ -92,16 +92,6 @@ client.on("ready", () => {
 		const index = Math.floor(Math.random() * (play_act.length - 1) + 1);
 		client.user.setPresence({ game: { name: play_act[index], type: "PLAYING" } });
 	}, 120000);
-
-	setInterval(() => {
-		if (moment().isoWeekday().toString() === '7') {
-			if (moment().format("HH:mm").toString() == "23:59") {
-				sqlcon.query(`UPDATE stafflist SET PlayTime = '0'`)
-			}
-		}
-	}, 40000)
-
-
 });
 
 // #region Guild events
@@ -123,19 +113,19 @@ client.on("guildDelete", guild => {
 
 // #region Guild member events
 client.on("guildMemberAdd", member => {
-	if (!member.bot || !member.guild) return;
+	if (member.bot || !member.guild) return;
 	logs.MemberAdd(client, member, sqlcon);
 });
 client.on("guildMemberRemove", async (member) => {
-	if (!member.bot || !member.guild) return;
+	if (member.bot || !member.guild) return;
 	logs.MemberRemove(client, member, sqlcon);
 });
 client.on("guildMemberUpdate", function (oldMem, newMem) {
-	if (!oldMem.bot || !oldMem.guild || !oldMem || !newMem) return;
+	if (oldMem.bot || !oldMem.guild || !oldMem || !newMem) return;
 	logs.MemberUpdate(client, oldMem, newMem, sqlcon);
 });
-client.on("guildBanAdd", async function (guild, user) {
-	if (!member.bot || !member.guild) return;
+client.on("guildBanAdd", async function (guild, member) {
+	if (member.bot || !member.guild) return;
 	logs.AddBan(client, member, sqlcon);
 })
 // #endregion
@@ -187,14 +177,12 @@ client.on("message", async message => {
 // #endregion
 
 // #region Misc. bot events
-client.on("debug", console.debug);
 client.on("warn", console.warn);
 client.on("error", console.error);
 client.on('disconnect', () => console.log('I just disconnected, making sure you know, I will reconnect now...'));
 client.on('reconnecting', () => console.log('I am reconnecting now!'));
 // #endregion
 
-// #region Functions
 //#region Handle Message
 function MessageCheck(message, sqlguild, sqlcon) {
 
@@ -327,38 +315,6 @@ function CreateChanPrefs(message, sqlcon) {
 	MsgVoteChan(message, sqlcon)
 }
 // #endregion
-
-function AntiRaid(member) {
-	if (!member.guild.roles.find(role => role.name === "Anti-Raid")) {
-		member.guild.createRole({
-			name: "Anti-Raid",
-			color: "LUMINOUS_VIVID_PINK",
-			hoist: false,
-			position: 9,
-			permissions: [],
-			mentionable: false
-		}).catch(error => { return member.reply(`Sorry, i was unable to create the Anti-Raid role. ${error}`) });
-		setTimeout(function () {
-			let Guild = member.guild
-			let blarg = Guild.channels.filter(channel => channel.type === "text")
-			blarg.forEach(f => {
-				let mrole = member.guild.roles.find(role => role.name === "Muted").id
-				f.overwritePermissions(mrole, { SEND_MESSAGES: false, ADD_REACTIONS: false })
-			});
-			let role = member.guild.roles.find(role => role.name === "Muted");
-			member.addRole(role).catch(O_o => { });
-			member.send("This server currently has the anti-raid feature enabled, so all new members have been automatically muted!")
-			member.addRole(role).catch(O_o => { });
-
-		}, 500);
-	}
-	else {
-		let role = member.guild.roles.find(role => role.name === "Anti-Raid");
-		member.addRole(role).catch(O_o => { });
-		member.send("This server currently has the anti-raid feature enabled, so all new members have been automatically muted!")
-		member.addRole(role).catch(O_o => { });
-	}
-}
 
 //#region Chat Functions
 function PingMessage(message, PrefixCheck) {
@@ -559,20 +515,6 @@ function Setup(message, prefix) {
 		catch (error) { message.channel.send(SetupGuide) }
 	}
 
-}
-function Eval(message) {
-	if (message.author.id === config.ownerID) {
-		try {
-			const code = args.join(" ");
-			let evaled = eval(code);
-
-			if (typeof evaled !== "string")
-				evaled = require("util").inspect(evaled);
-
-			message.channel.send(clean(evaled), { code: "xl" });
-		}
-		catch (error) { utils.CatchError(message, error, cmdused) }
-	}
 }
 // #endregion
 

@@ -9,6 +9,7 @@ const mbot = require('./utilities/modbot.js');
 const stats = require('./utilities/stattrack.js');
 const watcher = require('./utilities/watcher.js');
 const logs = require('./utilities/loggingsystem.js');
+const patreon = require('./utilities/patreon.js');
 const moment = require("moment");
 const fs = require("fs");
 const mysql = require("mysql");
@@ -123,6 +124,12 @@ client.on("guildMemberRemove", async (member) => {
 client.on("guildMemberUpdate", function (oldMem, newMem) {
 	if (oldMem.bot || !oldMem.guild || !oldMem || !newMem) return;
 	logs.MemberUpdate(client, oldMem, newMem, sqlcon);
+
+	if(oldMem.roles.equals(newMem.roles)) return;
+
+	if (newMem.roles.find(role => role.id === "595625984582090764")) {
+		patreon.AddDonator(newMem);
+	}
 });
 client.on("guildBanAdd", async function (guild, member) {
 	if (member.bot || !member.guild) return;
@@ -147,7 +154,6 @@ client.on("message", async message => {
 		let MsgContent = message.content.split(' ')
 		if (MsgContent[0] === `${config.prefix}say`) {
 			let Guild = client.guilds.find(guild => guild.id === MsgContent[1]);
-			let Channel = Guild.channels.find(channel => channel.id === MsgContent[2]);
 			if (Guild === null) return message.reply("I was unable to find that guild");
 			else {
 				let Channel = Guild.channels.find(channel => channel.id === MsgContent[2]);
@@ -157,6 +163,10 @@ client.on("message", async message => {
 					Channel.send(sMessage)
 				}
 			}
+		}
+		else if(MsgContent[0] === `${config.prefix}scp`){
+
+
 		}
 	}
 	else if (message.mentions.users.first() != undefined && message.mentions.users.first().id === client.user.id && args[1] === "help") {

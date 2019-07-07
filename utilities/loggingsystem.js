@@ -4,7 +4,7 @@ const bot = require('../CorruptionBot.js')
 
 //#region Message logging
 module.exports.MessageDeleted = (client, message, sqlcon) => {
-    GetLoggingStatus(sqlcon, member.guild.id, function (LogObject) {
+    GetLoggingStatus(sqlcon, message.guild.id, function (LogObject) {
         setTimeout(function () {
             if (!LogObject.MessageLogging || !LogObject.MessageLoggingChannel) return
 
@@ -35,7 +35,7 @@ module.exports.MessageDeleted = (client, message, sqlcon) => {
     })
 }
 module.exports.MessageEdited = (client, oldMSG, newMSG, sqlcon) => {
-    GetLoggingStatus(sqlcon, member.guild.id, function (LogObject) {
+    GetLoggingStatus(sqlcon, oldMSG.guild.id, function (LogObject) {
 
         if (!LogObject.MessageLogging || !LogObject.MessageLoggingChannel) return
 
@@ -142,7 +142,8 @@ module.exports.MemberRemove = (client, member, sqlcon) => {
     })
 }
 module.exports.MemberUpdate = (client, oldMem, newMem, sqlcon) => {
-    GetLoggingStatus(sqlcon, member.guild.id, function (LogObject) {
+    if(oldMem.nickname == newMem.nickname) return
+    GetLoggingStatus(sqlcon, oldMem.guild.id, function (LogObject) {
 
         if (!LogObject.MemberLogging || !LogObject.MemberLoggingChannel) return;
 

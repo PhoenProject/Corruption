@@ -55,7 +55,7 @@ module.exports.massping = (client, message, sqlcon) => {
             AddAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
         }
         else if (TotalMentions > 7) {
-            message.member.ban("Automatic ban for mass pinging 8 or more users/roles").catch(error => { utils.CatchError(message, error, cmdused) });
+            message.member.ban("Automatic ban for mass pinging 8 or more users/roles").catch(error => { console.log(error) });
             message.channel.send("User has been banned from the server!")
         }
     }

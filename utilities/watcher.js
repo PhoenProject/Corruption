@@ -107,12 +107,12 @@ function AddToDataBase(message, mArgs, mName, Value, DB) {
     let Reason = mArgs.slice(2).join(' ');
 
     //Checks if the data is valid
-    let isvalid = CheckIsValid(Value, DB, function (isValid) {
+    CheckIsValid(Value, DB, function (isValid) {
 
         if (isValid != true) return message.channel.send(isValid);
 
         //Checks if the data already exists in the database
-        let doesexist = CheckDB(Value, DB, function (doesExist) {
+        CheckDB(Value, DB, function (doesExist) {
             if (doesExist) return message.channel.send("That user already exists!");
 
             watchcon.query(`INSERT INTO ${DB} (Value, Reason, AddedBy) VALUES (?, ?, ?)`, [Value, Reason, mName]);
@@ -155,22 +155,26 @@ function UpdateDateBase(message, mArgs, Value, DB) {
     if (!mArgs[1]) return message.reply("you need to state an IP/ID >:(");
     if (!mArgs[2]) return message.reply("you need to state a reason >:(");
 
+    let Reason = mArgs.slice(2).join(' ');
+
     //Checks if the data is valid
-    var isValid = CheckIsValid(Value, DB);
-    if (isValid != true) return message.channel.send(isValid);
+    CheckIsValid(Value, DB, function (isValid) {
+        if (isValid != true) return message.channel.send(isValid);
 
-    //Checks if the data already exists in the database
-    var doesExist = CheckDB(Value, DB);
-    if (doesExist == false) return message.channel.send("That user does not exist!");
+        //Checks if the data already exists in the database
+        CheckDB(Value, DB, function (doesExist) {
+            if (doesExist == false) return message.channel.send("That user does not exist!");
 
-    watchcon.query(`UPDATE ${DB} SET Reason = ? WHERE Value = ?`, [Reason, Value]);
-    setTimeout(function () {
-        watchcon.query(`SELECT * FROM ${DB} WHERE Value = ?`, [Value], (err, rows) => {
-            if (err) return message.channel.send("There was an error updating that user on the database! " + err);
-            else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the update!\nGo ree at <@124241068727336963>");
-            else message.channel.send(`Sucessfully updated ||${Value}|| on the database!`);
-        })
-    }, 300)
+            watchcon.query(`UPDATE ${DB} SET Reason = ? WHERE Value = ?`, [Reason, Value]);
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM ${DB} WHERE Value = ?`, [Value], (err, rows) => {
+                    if (err) return message.channel.send("There was an error updating that user on the database! " + err);
+                    else if (!rows || rows.length < 1) return message.channel.send("I encountered an error when validating the update!\nGo ree at <@124241068727336963>");
+                    else message.channel.send(`Sucessfully updated ||${Value}|| on the database!`);
+                })
+            }, 300)
+        });
+    });
 }
 function GetInfo(message, mArgs, Value, DB) {
     message.delete();

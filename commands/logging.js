@@ -10,12 +10,12 @@ module.exports.run = async (client, message, args, sqlcon) => {
                 if (rows[0].MsgLogChan === "null") { message.channel.send("You must specify a logging channel first!") }
                 else {
                     if (args[1] === "enable") {
-                        sqlcon.query(`UPDATE guildprefs SET MsgLog = 'true' WHERE GuildID = '${message.guild.id}'`)
+                        sqlcon.query(`UPDATE guildprefs SET MsgLog = true WHERE GuildID = '${message.guild.id}'`)
 
                         message.channel.send("Message logging for this server has been enabled!")
                     }
                     else if (args[1] === "disable") {
-                        sqlcon.query(`UPDATE guildprefs SET MsgLog = 'false' WHERE GuildID = '${message.guild.id}'`)
+                        sqlcon.query(`UPDATE guildprefs SET MsgLog = false WHERE GuildID = '${message.guild.id}'`)
 
                         message.channel.send("Message logging for this server has been disabled!")
                     }
@@ -36,12 +36,12 @@ module.exports.run = async (client, message, args, sqlcon) => {
                 if (rows[0].MemLogChan === "null") { message.channel.send("You must specify a logging channel first!") }
                 else {
                     if (args[1] === "enable") {
-                        sqlcon.query(`UPDATE guildprefs SET MemLog = 'true' WHERE GuildID = '${message.guild.id}'`)
+                        sqlcon.query(`UPDATE guildprefs SET MemLog = true WHERE GuildID = '${message.guild.id}'`)
 
                         message.channel.send("Member logging for this server has been enabled!")
                     }
                     else if (args[1] === "disable") {
-                        sqlcon.query(`UPDATE guildprefs SET MemLog = 'false' WHERE GuildID = '${message.guild.id}'`)
+                        sqlcon.query(`UPDATE guildprefs SET MemLog = false WHERE GuildID = '${message.guild.id}'`)
 
                         message.channel.send("Member logging for this server has been disabled!")
                     }

@@ -383,6 +383,9 @@ async function Watch(client, message, sqlcon) {
     message.channel.send('Now state the name of the player! (Type `cancel` to cancel)')
     message.channel.awaitMessages(filter, { max: 1, time: 15000, errors: ['time'] }).then((Hname) => {
         if (Hname.first().toString().toLowerCase() != "cancel") {
+
+            let SQLName = Hname.first().toString().replace(/'/g, '~')
+
             let wantedembed = new Discord.RichEmbed()
                 .setAuthor(`Hunter - Suspicious player`, client.user.avatarURL)
                 .setColor(8528115)
@@ -404,7 +407,7 @@ async function Watch(client, message, sqlcon) {
 
                             let SQLreason = Haddnotes.first().toString().replace(/'/g, '~')
 
-                            statssqlcon.query(`INSERT INTO watchlist (Name, SteamID, IP, Reason, Hacker, Watch) VALUES ('${Hname.first().content}', '${Hsteamid.first().toString()}', '', '${SQLreason}', '0', '1')`)
+                            statssqlcon.query(`INSERT INTO watchlist (Name, SteamID, Reason, Hacker, Watch) VALUES (?, ?, ?, '0', '1')`, [SQLName, Hsteamid.first().content, SQLreason]);
 
                             message.guild.channels.find(channel => channel.id === "440887611406680096").send(wantedembed)
                             message.channel.bulkDelete(6).catch(error => {console.log(error)})

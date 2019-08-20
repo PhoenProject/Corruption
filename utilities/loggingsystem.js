@@ -63,9 +63,6 @@ module.exports.MessageEdited = (client, oldMSG, newMSG, sqlcon) => {
 //#region Member logging
 module.exports.MemberAdd = (client, member, sqlcon) => {
     GetLoggingStatus(sqlcon, member.guild.id, function (LogObject) {
-
-        console.log(LogObject.MemberLogging + " a " + LogObject.MemberLoggingChannel);
-
         if (!LogObject.MemberLogging || !LogObject.MemberLoggingChannel) return;
 
         let mlogchannel = member.guild.channels.find((channel => channel.id === LogObject.MemberLoggingChannel));

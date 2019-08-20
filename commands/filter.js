@@ -1,7 +1,6 @@
 const Discord = require("discord.js");
 const config = require("../config.json");
 const utils = require('../utilities/utils.js');
-const base = require('../utilities/basebot.js');
 const dscp = require('../utilities/dscpcmds.js');
 const autow = require('../utilities/autowarning.js');
 const mbot = require('../utilities/modbot.js');

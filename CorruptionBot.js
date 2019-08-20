@@ -254,7 +254,7 @@ function BattleOfTwoServers(message) {
 		}
 	}
 }
-function DragonSCP(message) {
+function DragonSCP(message, cmd) {
 	if (message.guild.id === "403155047527088129") {
 		switch (cmd) {
 			case "onduty":

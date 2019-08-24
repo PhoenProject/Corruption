@@ -92,9 +92,10 @@ module.exports.restart = (message) => {
                     .pull(remote, "master")
                     .exec(() => {
                         console.log('finished')
-                        var spawn = exec(`pm2 restart ${config.ProcessName}`, {
-                            detached: true
-                        });
+
+                        pm2.connect(function(err) {
+                            pm2.restart(config.ProcessName)
+                        })
                     })
 
             }

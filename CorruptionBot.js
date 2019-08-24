@@ -84,11 +84,17 @@ const replies = [
 	`Did you know: In Switzerland it is illegal to own just one guinea pig.`,
 	`Did you know: The oldest “your mom” joke was discovered on a 3,500 year old Babylonian tablet.`,
 	`Did you know: There is a nut on a helicopter called the ‘Jesus Nut’.`,
+	`Did you know: BeanieHatGaming is the biggest gay...`,
+	`Did you know: Kerbal Space Program is getting a sqeual!`,
 	`Hmmm, Was there something you needed?`,
 	`**Roar!**\nI'm a big scary monster, fear me!!!`,
 	`99 bottles of beer on the wall, 99 bottles of beer. \nTake one down and pass it around, 98 bottles of beer on the wall.`,
 	`Humpty Dumpty sat on a wall,\nHumpty Dumpty had a great fall;\nAll the king's horses and all the king's men\nCouldn't put Humpty together again.`,
-	`Pong!`
+	`Pang!`,
+	`Peng!`,
+	`Ping!`,
+	`Pong!`,
+	`Pung!`
 ];
 // #endregion
 
@@ -186,6 +192,8 @@ client.on("message", async message => {
 
 //#region Handle Message
 function MessageCheck(message, sqlguild, sqlcon) {
+
+	if(!message.content.startsWith(sqlguild[0].Prefix)) return;
 
 	let Message = message.content.slice((sqlguild[0].Prefix).length);
 	let MsgContent = Message.split(" ");

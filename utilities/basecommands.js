@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const config = require("../config.json");
 var exec = require('exec');
+var pm2 = require('pm2');
 
 module.exports.ping = (message, client) => {
     let cmdused = "ping"

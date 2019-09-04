@@ -133,22 +133,26 @@ function DelFromDataBase(message, mArgs, Value, DB) {
     if (!mArgs[1]) return message.reply("you need to state an IP/ID >:(");
 
     //Checks if the data is valid
-    var isValid = CheckIsValid(Value, DB);
-    if (isValid != true) return message.channel.send(isValid);
+    CheckIsValid(Value, DB, function (isValid) {
 
-    //Checks if the data already exists in the database
-    var doesExist = CheckDB(Value, DB);
-    if (doesExist == false) return message.channel.send("That user does not exist!");
+        if (isValid != true) return message.channel.send(isValid);
 
-    watchcon.query(`DELETE FROM ${DB} WHERE Value = ?`, [Value]);
-    setTimeout(function () {
-        watchcon.query(`SELECT * FROM ${DB} WHERE Value = ?`, [Value], (err, rows) => {
-            if (err) return message.channel.send("There was an error removing that user from the database! " + err);
-            else if (!rows || rows.length < 1) return message.channel.send(`Sucessfully removed ||${Value}|| from the database!`);
-            else return message.channel.send("I encountered an error when validating the removal!\nGo ree at <@124241068727336963>");
+        //Checks if the data already exists in the database
+        CheckDB(Value, DB, function (doesExist) {
+            if (!doesExist) return message.channel.send("That user does not exist!");
+
+            watchcon.query(`DELETE FROM ${DB} WHERE Value = ?`, [Value]);
+            setTimeout(function () {
+                watchcon.query(`SELECT * FROM ${DB} WHERE Value = ?`, [Value], (err, rows) => {
+                    if (err) return message.channel.send("There was an error removing that user from the database! " + err);
+                    else if (!rows || rows.length < 1) return message.channel.send(`Sucessfully removed ||${Value}|| from the database!`);
+                    else return message.channel.send("I encountered an error when validating the removal!\nGo ree at <@124241068727336963>");
+                })
+            }, 300)
         })
-    }, 300)
+    })
 }
+
 function UpdateDateBase(message, mArgs, Value, DB) {
     message.delete();
 

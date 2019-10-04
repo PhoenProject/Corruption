@@ -1,56 +1,72 @@
-const Discord = require("discord.js");
-const utils = require('../utilities/utils.js');
+const utils = require('../utilities/BaseBotFunction.js');
 const moment = require("moment");
-const bot = require('../CorruptionBot.js')
+const Discord = require("discord.js");
 
-module.exports.run = async (client, message, args, sqlcon) => {
-    sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) utils.ConsoleMessage(err, client)
-        if (message.member.roles.find(role => role.id === rows[0].ModRole) || message.member.roles.find(role => role.id === rows[0].AdminRole) || message.member.hasPermission("ADMINISTRATOR")) {
-            let cmdused = "unmute"
-            let perm = "MANAGE_MESSAGES"
-            let hArgs = "<user>"
-            let desc = "Unmutes a muted user."
-            let Member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
-            let mRole = message.guild.roles.find(role => role.name === "Muted")
-            if (Member == null || Member == undefined)
-                return message.channel.send("That member could not be found!");
-            else if (Member.bot)
-                return message.channel.send("You can not unmute bots!");
-            else if (Member.id === message.author.id)
-                return message.channel.send("You can not unmute yourself!");
-            else if (Member.highestRole.position > message.member.highestRole.position)
-                return message.channel.send("That user is higher than you, so i am unable to let you unmute them!");
-            else if (Member.highestRole.position === message.member.highestRole.position)
-                return message.channel.send("That user is same rank as you, so i am unable to let you unmute them!");
-            else {
-                Member.removeRole(mRole).catch(error => { utils.CatchError(message, error, cmdused) });
-                setTimeout(function () {
-                    sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
+module.exports.run = async (client, message, MsgContent, prefix, sqlcon) => {
+    if (!this.config.enabled) return utils.ConsoleMessage(`${message.author.id} tried to trigger disabled command ${this.config.name}`, `info`)
+
+    switch (!MsgContent[0] ? MsgContent[0] : MsgContent[0].toString().toLowerCase()) {
+        case "help":
+            utils.HelpMessage(client, message, prefix, this.config.name, this.config.subcommands, this.config.info, this.config.perms);
+            break;
+        default:
+            Action(client, message, this.config.perms[1], MsgContent, sqlcon)
+            break;
+
+    }
+}
+
+async function Action(client, message, perm, MsgContent, sqlcon) {
+    if (!message.member.hasPermission(perm)) return;
+    if (!MsgContent[0]) return message.channel.send("You need to specify a user!");
+
+    utils.GetUser(client, message, MsgContent[0], function (targetMember) {
+        if(!targetMember) return message.channel.send(`Unable to find user ${MsgContent[0]}`);
+
+        utils.CheckCanAct(client, message.member, targetMember, "mute", function (CanAct) {
+            if (CanAct !== "CanAct") return message.channel.send(CanAct);
+
+
+            let mRole = message.guild.roles.find(role => role.name.toLowerCase() === "muted")
+
+            setTimeout(() => {
+                if (!targetMember.roles.has(mRole.id)) return message.channel.send("User is not muted.")
+                targetMember.removeRole(mRole).then(() => {
+
+                    let muteEmbed = new Discord.RichEmbed()
+                        .setAuthor(`Unmuted ${targetMember.user.tag}`, targetMember.user.avatarURL)
+                        .setColor(targetMember.displayHexColor)
+                        .setFooter(`UserID: ${targetMember.user.id}`)
+                        .setTimestamp()
+                        .setThumbnail(targetMember.user.avatarURL)
+                        .addField(`Unmute:`,
+                            `Unmuted by ${message.author}`
+                            + `\n**Issue Time:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`);
+
+                    message.channel.send(`${targetMember} has been unmuted!`)
+
+
+                    sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = ${message.guild.id}`, (error, ModLog) => {
+                        if(error) return utils.ConsoleMessage(error, `error`);
                         let warnchannel = message.guild.channels.find((channel => channel.id === ModLog[0].ModLogchan));
-                        if (warnchannel != null) {
-                            let muteEmbed = new Discord.RichEmbed()
-                                .setAuthor(`Mute removed from ${Member.user.tag}`, Member.user.avatarURL)
-                                .setColor(Member.displayHexColor)
-                                .setFooter(`UserID: ${Member.user.id}`)
-                                .setTimestamp()
-                                .setThumbnail(Member.user.avatarURL)
-                                .addField(`Mute:`,
-                                    `Removed by ${message.author}`
-                                    + `\n**Time of removal:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`);
-                            warnchannel.send(muteEmbed)
-                        }
-                        message.channel.send(`${Member} has been unmuted!`)
+                        if (warnchannel == null) return;
+
+                        warnchannel.send(muteEmbed)
                     })
 
-                }, 500);
-            }
-        }
+                }).catch(error => { return utils.ConsoleMessage(error, `error`) });
+            }, 100);
+        })
     })
 }
+
 module.exports.config = {
-    name: "unmute",
-    aliases: ["unstab", "ungag", "unbin"],
-    info: "Unmutes a user (opposite of the mute command)",
-    type: "mod"
+    name: "unmute", //Name of the command that will be used to call it
+    aliases: ["unstab", "ungag", "unbin", ""], //Aliases of the command that can be used (This must NEVER be left empty)
+    info: "Unblocks a user from sending messages and adding new reactions", //Short description of the command that will show on all help embeds
+    type: "mod",  //Category in the ?help embed where this command will be visible
+    subcommands: [""], //List of sub commands awailable. Help shouldn't ever be included in this list
+    perms: ["MANAGE_MESSAGES"], //Permissions required for this command
+    hidden: false, //Should this command be shown in ?help
+    enabled: true //Should this command be allowed to be triggered
 }

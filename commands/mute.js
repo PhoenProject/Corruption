@@ -1,99 +1,92 @@
-const Discord = require("discord.js");
-const utils = require('../utilities/utils.js');
-const bot = require('../CorruptionBot.js')
+const utils = require('../utilities/BaseBotFunction.js');
 const moment = require("moment");
+const Discord = require("discord.js");
 
-function JokeMute(client, message, mRole) {
-  if (!mRole) return message.channel.send("REEEEE");
-  let role = message.guild.roles.find(role => role.name === "Muted");
-  message.member.addRole(role).catch(error => { message.channel.send("REEEEE"); });
-  setTimeout(function () {
-    message.member.removeRole(mRole).catch(error => { message.channel.send("Erm, this is awkward...\nI am unable to remove the muted role!"); });
-    message.reply("maybe you'll think twice next time you try to mute me...");
-  }, 10000000000000)
-}
+module.exports.run = async (client, message, MsgContent, prefix, sqlcon) => {
+    if (!this.config.enabled) return utils.ConsoleMessage(`${message.author.id} tried to trigger disabled command ${this.config.name}`, `info`)
 
-module.exports.run = async (client, message, args, sqlcon) => {
-  sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-    if (err) utils.ConsoleMessage(err, client)
-    if (message.member.roles.find(role => role.id === rows[0].ModRole) || message.member.roles.find(role => role.id === rows[0].AdminRole) || message.member.hasPermission("ADMINISTRATOR")) {
-      let cmdused = "mute";
-      let perm = "MANAGE_MESSAGES";
-      let hArgs = "<user>"
-      let desc = "Mutes a user on the server, preventing them from sending messages and adding reactions.";
-      let Member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
-      let mRole = message.guild.roles.find(role => role.name === "Muted")
-      if (Member.id === client.user.id)
-        return JokeMute(client, message, mRole)
-      else if (Member == null || Member == undefined)
-        return message.channel.send("That member could not be found!");
-      else if (Member.user.bot)
-        return message.channel.send("You can not mute bots!");
-      else if (Member.id === message.author.id)
-        return message.channel.send("You can not mute yourself!");
-      else if (Member.highestRole.position > message.member.highestRole.position)
-        return message.channel.send("That user is higher than you, so i am unable to let you mute them!");
-      else if (Member.highestRole.position === message.member.highestRole.position)
-        return message.channel.send("That user is same rank as you, so i am unable to let you mute them!");
-      if (!mRole) {
-        message.channel.send("It appears that there is no muted role set up. I will quickly make one per pre-set specifications")
-        message.guild.createRole({
-          name: "Muted",
-          color: "LUMINOUS_VIVID_PINK",
-          hoist: false,
-          position: 9,
-          permissions: [],
-          mentionable: false
-        }).catch(error => { return message.reply(`Sorry, i was unable to execute that command. ${error}`) });
-        setTimeout(function () {
-          let Guild = message.guild
-          let blarg = Guild.channels.filter(channel => channel.type === "text")
-          blarg.forEach(f => {
-            let mrole = message.guild.roles.find(role => role.name === "Muted").id
-            f.overwritePermissions(mrole, { SEND_MESSAGES: false, ADD_REACTIONS: false })
-          });
-          let role = message.guild.roles.find(role => role.name === "Muted");
-          Member.addRole(role).catch(error => { utils.CatchError(message, error, cmdused) });
-        }, 500);
+    switch (!MsgContent[0] ? MsgContent[0] : MsgContent[0].toString().toLowerCase()) {
+        case "help":
+            utils.HelpMessage(client, message, prefix, this.config.name, this.config.subcommands, this.config.info, this.config.perms);
+            break;
+        default:
+            Action(client, message, this.config.perms[1], MsgContent, sqlcon)
+            break;
 
-        message.channel.send(`A muted role has been made, and ${Member} and been given it.`)
-      }
-      else {
-        if (Member.roles.has(mRole.id)) return message.channel.send("User is already muted.")
-        Member.addRole(mRole).catch(error => { utils.CatchError(message, error, cmdused) });
-        setTimeout(function () {
-          if (Member.roles.has(mRole.id)) {
-            sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
-              let warnchannel = message.guild.channels.find((channel => channel.id === ModLog[0].ModLogchan));
-              if (warnchannel != null) {
-                let reason = args.slice(1).join(" ");
-                if (reason === "") reason = "No reason given!"
-                let muteEmbed = new Discord.RichEmbed()
-                  .setAuthor(`Mute given to ${Member.user.tag}`, Member.user.avatarURL)
-                  .setColor(Member.displayHexColor)
-                  .setFooter(`UserID: ${Member.user.id}`)
-                  .setTimestamp()
-                  .setThumbnail(Member.user.avatarURL)
-                  .addField(`Mute:`,
-                    `Issued by ${message.author}`
-                    + `\n**Issue Time:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-                    + `\nReason: ${reason}`
-                    + `\n[Link to mute](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
-                warnchannel.send(muteEmbed)
-              }
-              message.channel.send(`${Member} has been given the Muted role!`)
-
-            })
-          }
-        }, 500);
-      }
     }
-
-  })
 }
+
+async function Action(client, message, perm, MsgContent, sqlcon) {
+    if (!message.member.hasPermission(perm)) return;
+    if (!MsgContent[0]) return message.channel.send("You need to specify a user!");
+
+    utils.GetUser(client, message, MsgContent[0], function (targetMember) {
+        if(!targetMember) return message.channel.send(`Unable to find user ${MsgContent[0]}`);
+
+        let reason
+
+        utils.CheckCanAct(client, message.member, targetMember, "mute", function (CanAct) {
+            if (CanAct !== "CanAct") return message.channel.send(CanAct);
+
+            if (!MsgContent[1]) reason = "No reason given"
+            else reason = MsgContent.slice(1).join(" ")
+
+            let mRole = message.guild.roles.find(role => role.name.toLowerCase() === "muted")
+
+            if (!mRole) {
+                guild.createRole({ name: "Muted", color: "LUMINOUS_VIVID_PINK", hoist: false, position: 9, permissions: [], mentionable: false })
+                    .catch(error => { return utils.ConsoleMessage(error, `error`) });
+
+                setTimeout(function () {
+
+                    mRole = message.guild.roles.find(role => role.name.toLowerCase() === "muted")
+
+                    Guild.channels.filter(channel => channel.type === "text").forEach(TextChannel => { TextChannel.overwritePermissions(mRole, { SEND_MESSAGES: false, ADD_REACTIONS: false }) });
+                    Guild.channels.filter(channel => channel.type === "voice").forEach(VoiceChannel => { VoiceChannel.overwritePermissions(mRole, { CONNECT: false }) });
+
+                }, 100);
+            }
+
+            setTimeout(() => {
+                if (targetMember.roles.has(mRole.id)) return message.channel.send("User is already muted.")
+                targetMember.addRole(mRole).then(() => {
+
+                    let muteEmbed = new Discord.RichEmbed()
+                        .setAuthor(`Mute given to ${targetMember.user.tag}`, targetMember.user.avatarURL)
+                        .setColor(targetMember.displayHexColor)
+                        .setFooter(`UserID: ${targetMember.user.id}`)
+                        .setTimestamp()
+                        .setThumbnail(targetMember.user.avatarURL)
+                        .addField(`Mute:`,
+                            `Issued by ${message.author}`
+                            + `\n**Issue Time:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
+                            + `\nReason: ${reason}`
+                            + `\n[Link to mute](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
+
+                    message.channel.send(`${targetMember} has been muted!`)
+
+
+                    sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = ${message.guild.id}`, (error, ModLog) => {
+                        if(error) return utils.ConsoleMessage(error, `error`);
+                        let warnchannel = message.guild.channels.find((channel => channel.id === ModLog[0].ModLogchan));
+                        if (warnchannel == null) return;
+
+                        warnchannel.send(muteEmbed)
+                    })
+
+                }).catch(error => { return utils.ConsoleMessage(error, `error`) });
+            }, 100);
+        })
+    })
+}
+
 module.exports.config = {
-  name: "mute",
-  aliases: ["stab", "gag", "bin", "recycle"],
-  info: "Blocks a user from sending messages, and from adding reactions",
-  type: "mod"
+    name: "mute", //Name of the command that will be used to call it
+    aliases: ["stab", "gag", "bin", "recycle"], //Aliases of the command that can be used (This must NEVER be left empty)
+    info: "Blocks a user from sending messages and adding new reactions to messages", //Short description of the command that will show on all help embeds
+    type: "mod",  //Category in the ?help embed where this command will be visible
+    subcommands: [""], //List of sub commands awailable. Help shouldn't ever be included in this list
+    perms: ["MANAGE_MESSAGES"], //Permissions required for this command
+    hidden: false, //Should this command be shown in ?help
+    enabled: true //Should this command be allowed to be triggered
 }

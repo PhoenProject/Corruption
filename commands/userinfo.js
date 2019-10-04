@@ -1,65 +1,62 @@
-const Discord = require("discord.js");
-const utils = require('../utilities/utils.js');
+const utils = require('../utilities/BaseBotFunction.js');
 const moment = require("moment");
-function GetWarns(message, sqlcon, userInfoEmbed) {
-  sqlcon.query(`SELECT * FROM warnsnew WHERE UserID = '${message.author.id}' AND GuildID = '${message.guild.id}'`, (err, warnings) => {
-    if (warnings.length > 1) {
-      userInfoEmbed.addField(`Warnings`, `Currently has no warnings`)
+const Discord = require("discord.js");
+
+module.exports.run = async (client, message, MsgContent, prefix, sqlcon) => {
+    if (!this.config.enabled) return utils.ConsoleMessage(`${message.author.id} tried to trigger disabled command ${this.config.name}`, `info`)
+
+    switch (!MsgContent[0] ? MsgContent[0] : MsgContent[0].toString().toLowerCase()) {
+        case "help":
+            utils.HelpMessage(client, message, prefix, this.config.name, this.config.subcommands, this.config.info, this.config.perms);
+            break;
+        default:
+            Action(client, message, this.config.perms[1], MsgContent, sqlcon)
+            break;
+
     }
-    else if (warnings.length === 1) {
-      userInfoEmbed.addField(`Warnings`, `Currently has 1 warning`)
-    }
-    else {
-      userInfoEmbed.addField(`Warnings`, `Currently has ${warnings.length} warnings`)
-    }
-  })
 }
 
-module.exports.run = async (client, message, args, sqlcon) => {
-  let uMember = message.mentions.members.first()
-  if (uMember === undefined) uMember = message.member
+async function Action(client, message, perm, MsgContent, sqlcon) {
+    if (!message.member.hasPermission(perm)) return;
 
-  const userInfoEmbed = new Discord.RichEmbed()
-    .setThumbnail(uMember.user.displayAvatarURL)
-    .setColor(uMember.displayHexColor)
-    .setFooter(`UserID: ${uMember.user.id}`)
+    utils.GetUser(client, message, MsgContent[0], function (targetMember) {
+        if (!targetMember) targetMember = message.member;
 
-  GetWarns(message, sqlcon, userInfoEmbed)
+        var NowDate = moment(new Date(moment().format()));
+        var JoinDate = moment(new Date(targetMember.joinedAt.toUTCString()));
+        var CreationDate = moment(new Date(targetMember.user.createdAt.toUTCString()));
 
-  if (uMember.nickname != null) namestring = `${uMember.user.tag} - ${uMember.nickname}`
-  else namestring = uMember.user.tag
+        if (targetMember.displayHexColor == '#000000') EmbedColour = (`#17A589`);
+        else EmbedColour = targetMember.displayHexColor;
 
-  if (uMember.presence.status === "online") Presence = "Online"
-  else if (uMember.presence.status === "idle") Presence = "Idle"
-  else if (uMember.presence.status === "dnd") Presence = "DnD (Do not Disturb)"
-  else if (uMember.presence.status === "offline") Presence = "Offline"
+        let UserInfoEmbed = new Discord.RichEmbed()
+            .setAuthor(`${targetMember.user.tag}${targetMember.nickname === null ? "" : ` (${targetMember.nickname})`}`)
+            .setDescription(`Currently ${targetMember.presence.status === "online" ? "Online" : targetMember.presence.status === "idle" ? "Idle" : targetMember.presence.status === "dnd" ? "on DnD (Do not Disturb)" : "Offline"}`)
+            .setThumbnail(targetMember.user.displayAvatarURL)
+            .setColor(EmbedColour)
+            .setFooter(`UserID: ${targetMember.user.id}`)
+            .addField(`Creation date`, `${CreationDate.format('DD MMM YYYY, HH:mm')}\n(${NowDate.diff(CreationDate, `days`)} days ago)`, true)
+            .addField(`Join date`, `${JoinDate.format('DD MMM YYYY, HH:mm')}\n(${NowDate.diff(JoinDate, `days`)} days ago)`, true);
 
-  moment.updateLocale('en', {
-    relativeTime: {
-      s: 'A few seconds',
-      m: "A minute",
-      h: "An hour",
-      d: "A day",
-      M: "A month",
-      y: "A year",
-    }
-  });
+        sqlcon.query(`SELECT * FROM Warns WHERE GuildID = ? AND UserID = ?`, [message.guild.id, targetMember.id], (err, warnings) => {
+            if (err) return utils.ConsoleMessage(err, `error`);
 
+            UserInfoEmbed.addField(`Warnings`, `Currently has ${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"}`)
 
-  userInfoEmbed.setAuthor(namestring)
-  userInfoEmbed.setDescription(`Currently ${Presence}`)
-  userInfoEmbed.addField(`Account created on:`, `${moment(uMember.user.createdAt.toUTCString()).format('DD MMM YYYY, HH:mm')}`
-    + `\n(${moment(uMember.user.createdAt.toUTCString()).fromNow()})`, true)
-  userInfoEmbed.addField(`Joined guild`, `${moment(uMember.joinedAt.toUTCString()).format('DD MMM YYYY, HH:mm')}`
-    + `\n(${moment(uMember.joinedAt.toUTCString()).fromNow()})`, true)
-  userInfoEmbed.setFooter(`UserID: ${uMember.user.id}`);
-
-  setTimeout(() => { message.channel.send(userInfoEmbed) }, 50)
-
+            setTimeout(() => {
+                message.channel.send(UserInfoEmbed);
+            }, 500);
+        })
+    })
 }
+
 module.exports.config = {
-  name: "userinfo",
-  aliases: ["userinfo", "uinfo", "useri"],
-  info: "Shows a user's information",
-  type: "info"
+    name: "userinfo", //Name of the command that will be used to call it
+    aliases: ["uinfo", "useri"], //Aliases of the command that can be used (This must NEVER be left empty)
+    info: "Shows a user's information, such as creation date, and join date", //Short description of the command that will show on all help embeds
+    type: "info",  //Category in the ?help embed where this command will be visible
+    subcommands: [""], //List of sub commands awailable. Help shouldn't ever be included in this list
+    perms: [""], //Permissions required for this command
+    hidden: false, //Should this command be shown in ?help
+    enabled: true //Should this command be allowed to be triggered
 }

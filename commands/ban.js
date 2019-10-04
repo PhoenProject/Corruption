@@ -1,62 +1,51 @@
-const utils = require('../utilities/utils.js');
-const bot = require('../CorruptionBot.js')
+const utils = require('../utilities/BaseBotFunction.js');
+const moment = require("moment");
+const Discord = require("discord.js");
 
-module.exports.run = async (client, message, args, sqlcon) => {
-  sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-    if (err) utils.ConsoleMessage(err, client)
-    if (message.member.hasPermission("BAN_MEMBERS") || message.member.hasPermission("ADMINISTRATOR")) {
-      let cmdused = "ban"
-      let perm = "BAN_MEMBERS"
-      let desc = "Bans a user from the server."
-      let hArgs = "<user> <reason>"
-      let member = message.mentions.members.first();
-      let reason = args.slice(1).join(' ');
-      if (message.member.roles.find(role => role.id === rows[0].ModRole) || message.member.roles.find(role => role.id === rows[0].AdminRole) || message.member.hasPermission("ADMINISTRATOR")) {
-        let member = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
-        if (!member) return utils.Embed(message, cmdused, perm, desc, hArgs, sqlcon);
-        else {
-          if (member.id === client.user.id)
-            message.channel.send("**REEEE!**")
-          else if (member == null || member == undefined)
-            return message.channel.send("That member could not be found!");
-          else if (member.user.bot)
-            return message.channel.send("You can not ban bots!");
-          else if (member.id === message.author.id)
-            return message.channel.send("You can not ban yourself!");
-          else if (member.highestRole.position > message.member.highestRole.position)
-            return message.channel.send("That user is higher than you, so i am unable to let you ban them!");
-          else if (member.highestRole.position == message.member.highestRole.position)
-            return message.channel.send("That user is same rank as you, so i am unable to let you ban them!");
-          else if (reason === "")
-            return message.channel.send("You need to state a reason!")
-          else {
-            let warnchannel = message.guild.channels.find((channel => channel.id === rows[0].ModLogchan));
-            if (warnchannel != null) {
-              let muteEmbed = new Discord.RichEmbed()
-                .setAuthor(`You have been banned from ${message.guild.name}`, member.user.avatarURL)
-                .setColor(member.displayHexColor)
-                .setFooter(`UserID: ${member.user.id}`)
-                .setTimestamp()
-                .setThumbnail(member.user.avatarURL)
-                .addField(`ban:`,
-                  `Banned by ${message.author}`
-                  + `\n**Time of ban:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-                  + `\nReason: ${entry.getReason().orElse("No reason given!")}`);
-              member.send(muteEmbed)
-              setTimeout(function () {
-                member.kick(reason).then(message.channel.send(`${member} has been banned!`))
-                  .catch(error => { utils.CatchError(message, error, cmdused) });
-              }, 500)
-            }
-          }
-        }
-      }
+
+module.exports.run = async (client, message, MsgContent, prefix, sqlcon) => {
+    if (!this.config.enabled) return utils.ConsoleMessage(`${message.author.id} tried to trigger disabled command ${this.config.name}`, `info`)
+
+    switch (!MsgContent[0] ? MsgContent[0] : MsgContent[0].toString().toLowerCase()) {
+        case "help":
+            utils.HelpMessage(client, message, prefix, this.config.name, this.config.subcommands, this.config.info, this.config.perms);
+            break;
+        default:
+            Action(client, message, this.config.perms[0], MsgContent, sqlcon)
+            break;
+
     }
-  })
 }
+
+async function Action(client, message, perm, MsgContent, sqlcon) {
+    if (!message.member.hasPermission(perm)) return;
+    if (!MsgContent[0]) return message.channel.send("You need to specify a user!");
+
+    utils.GetUser(client, message, MsgContent[0], function (targetMember) {
+        if(!targetMember) return message.channel.send(`Unable to find user ${MsgContent[0]}`);
+
+        let reason
+
+        utils.CheckCanAct(client, message.member, targetMember, "ban", function (CanAct) {
+            if (CanAct !== "CanAct") return message.channel.send(CanAct)
+
+            if (!MsgContent[1]) reason = "No reason given"
+            else reason = MsgContent.slice(1).join(" ")
+
+            targetMember.ban(`Action requested by ${message.author.username} (${message.author.id}): ${reason}`)
+                .then(() => { message.channel.send(targetMember + ` has been kicked`) })
+                .catch(error => { message.channel.send(`I was unable to kick this user`); return utils.ConsoleMessage(error, `error`) });
+        })
+    })
+}
+
 module.exports.config = {
-  name: "ban",
-  aliases: ["ban"],
-  info: "Bans a user from your discord server",
-  type: "mod"
+    name: "ban", //Name of the command that will be used to call it
+    aliases: ["yeet", "bean"], //Aliases of the command that can be used (This must NEVER be left empty)
+    info: "Bans the user from the server", //Short description of the command that will show on all help embeds
+    type: "mod",  //Category in the ?help embed where this command will be visible
+    subcommands: [""], //List of sub commands awailable. Help shouldn't ever be included in this list
+    perms: ["BAN_MEMBERS"], //Permissions required for this command
+    hidden: false, //Should this command be shown in ?help
+    enabled: true //Should this command be allowed to be triggered
 }

@@ -1,55 +1,69 @@
-const utils = require('../utilities/utils.js');
+const utils = require('../utilities/BaseBotFunction.js');
+const moment = require("moment");
+const Discord = require("discord.js");
 
-async function ClearWarnEffects(message, wUser, sqlcon, cmdused) {
-    sqlcon.query(`SELECT * FROM warnsnew WHERE UserID = '${message.mentions.users.first().id}' AND GuildID = '${message.guild.id}'`, (err, WarnCount) => {
-        let wRole = message.guild.roles.find(role => role.name === "Warned")
-        let mRole = message.guild.roles.find(role => role.name === "Muted")
+module.exports.run = async (client, message, MsgContent, prefix, sqlcon) => {
+    if (!this.config.enabled) return utils.ConsoleMessage(`${message.author.id} tried to trigger disabled command ${this.config.name}`, `info`)
 
-        if (wUser.roles.find(role => role.id === wRole.id)) {
-            wUser.removeRole(wRole).catch(error => { utils.CatchError(message, error, cmdused) });
-        }
-        if (wUser.roles.find(role => role.id === mRole.id)) {
-            wUser.removeRole(mRole).catch(error => { utils.CatchError(message, error, cmdused) });
-            message.channel.send("User has been unmuted!")
-        }
-    })
-}
-async function ClearWarns(message, wUser, sqlcon) {
-    sqlcon.query(`SELECT * FROM warnsnew WHERE UserID = '${message.mentions.users.first().id}' AND GuildID = '${message.guild.id}'`, (err, WarnCount) => {
-        if (WarnCount.length < 1) {
-            message.channel.send("That user has no warnings!")
-        }
-        else {
-            sqlcon.query(`DELETE FROM warnsnew WHERE UserID = '${wUser.id}' AND GuildID = '${message.guild.id}'`)
-            setTimeout(() => {
-                message.channel.send(`Warns for ${wUser} have been cleared!`)
-            }, 150);
-        }
-    })
+    switch (!MsgContent[0] ? MsgContent[0] : MsgContent[0].toString().toLowerCase()) {
+        case "help":
+            utils.HelpMessage(client, message, prefix, this.config.name, this.config.subcommands, this.config.info, this.config.perms);
+            break;
+        default:
+            Action(client, message, this.config.perms[1], MsgContent, sqlcon)
+            break;
+
+    }
 }
 
-module.exports.run = async (client, message, args, sqlcon) => {
-    let cmdused = "clearwarns"
-    let perm = "BAN_MEMBERS"
-    let desc = "Clears all warns for a specified user."
-    let hArgs = "<user>"
-    let wMember = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0])
-    sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
-        if (err) utils.ConsoleMessage(err, client) 
-        if (message.member.hasPermission("ADMINISTRATOR") || message.member.roles.find(role => role.id === rows[0].AdminRole)) {
-            if (!message.member.hasPermission(perm) || !wMember || args[0] === "help") return utils.Embed(message, cmdused, perm, desc, hArgs, sqlcon);
-        }
+async function Action(client, message, perm, MsgContent, sqlcon) {
+    if (!message.member.hasPermission(perm)) return;
+    if (!MsgContent[0]) return message.channel.send("You need to specify a user!");
+
+    utils.GetUser(client, message, MsgContent[0], function (targetMember) {
+
+        utils.CheckCanAct(client, message.member, targetMember, "warn", function (CanAct) {
+            if (CanAct !== "CanAct") return message.channel.send(CanAct);
+
+            sqlcon.query(`SELECT * FROM Warns WHERE UserID = ? AND GuildID = ?`, [targetMember.id, message.guild.id], (err, WarnCount) => {
+                if (err) return utils.ConsoleMessage(err, `error`)
+
+                sqlcon.query(`DELETE FROM Warns WHERE UserID = ? AND GuildID = ?`, [targetMember.id, message.guild.id])
+
+                setTimeout(() => {
+                    sqlcon.query(`SELECT * FROM Warns WHERE UserID = ? AND GuildID = ?`, [targetMember.id, message.guild.id], (err, Check) => {
+                        if (err) return utils.ConsoleMessage(err, `error`)
+
+                        if (Check.length < 1) {
+                            ClearPunishment(client, message, targetMember, Check.length)
+                            return message.channel.send(`Warns for ${targetMember} have been cleared`);
+                        }
+                        else {
+                            message.channel.send(`I was unable to remove warns for ${targetMember}`);
+                            return utils.ConsoleMessage(`I was unable to remove warns for ${targetMember.id}`, `error`)
+                        }
+                    })
+                }, 200)
+            })
+        })
     })
-    ClearWarns(message, wMember, sqlcon)
-
-    setTimeout(function () {
-        ClearWarnEffects(message, wMember, sqlcon, cmdused)
-    }, 200)
-
 }
+
+function ClearPunishment(client, message, member, count) {
+    let warned = message.guild.roles.find(role => role.name.toLowerCase() === "warned").id
+    let muted = message.guild.roles.find(role => role.name.toLowerCase() === "muted").id
+
+    if (member.roles.find(role => role.id === warned.id) && count < 1) member.removeRole(warned.id).catch(error => { utils.ConsoleMessage(error, `error`) });
+    if (member.roles.find(role => role.id === muted.id) && count < 3) member.removeRole(muted.id).catch(error => { utils.ConsoleMessage(error, `error`) });
+}
+
 module.exports.config = {
-    name: "clearwarns",
-    aliases: ["cw", "clearw"],
-    info: "Removes all warns from a user",
-    type: "mod"
+    name: "clearwarns", //Name of the command that will be used to call it
+    aliases: ["wipewarns"], //Aliases of the command that can be used (This must NEVER be left empty)
+    info: "Removes all warn from a user", //Short description of the command that will show on all help embeds
+    type: "mod",  //Category in the ?help embed where this command will be visible
+    subcommands: [""], //List of sub commands awailable. Help shouldn't ever be included in this list
+    perms: ["MANAGE_MESSAGES"], //Permissions required for this command
+    hidden: false, //Should this command be shown in ?help
+    enabled: true //Should this command be allowed to be triggered
 }

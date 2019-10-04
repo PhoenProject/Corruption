@@ -1,6 +1,25 @@
 const Discord = require("discord.js");
 const moment = require("moment");
-const bot = require('../CorruptionBot.js')
+
+const utils = require('./BaseBotFunction.js');
+
+const embedColours = [
+    `#A93226`,
+    `#CB4335 `,
+    `#884EA0 `,
+    `#7D3C98`,
+    `#2471A3`,
+    `#2E86C1`,
+    `#17A589`,
+    `#138D75`,
+    `#229954`,
+    `#28B463`,
+    `#D4AC0D`,
+    `#D68910`,
+    `#CA6F1E`,
+    `#BA4A00`,
+    `#A6ACAF`
+];
 
 //#region Message logging
 module.exports.MessageDeleted = (client, message, sqlcon) => {
@@ -8,7 +27,7 @@ module.exports.MessageDeleted = (client, message, sqlcon) => {
         setTimeout(function () {
             if (!LogObject.MessageLogging || !LogObject.MessageLoggingChannel) return
 
-            let logs = message.guild.fetchAuditLogs({ type: 72 }).catch(O_o => { });
+            let logs = message.guild.fetchAuditLogs({ type: 72 }).catch(error => { utils.ConsoleMessage(error, `error`); });
 
             let mlogchannel = message.guild.channels.find((channel => channel.id === LogObject.MessageLoggingChannel));
             if (mlogchannel == null) return
@@ -30,7 +49,7 @@ module.exports.MessageDeleted = (client, message, sqlcon) => {
                 sInfo.addField("Attatchment", aName, true)
             }
             if (message.content) sInfo.setDescription(message.content)
-            mlogchannel.send(sInfo).catch(O_o => { console.log("ERROR!!!!!") });
+            mlogchannel.send(sInfo).catch(error => { utils.ConsoleMessage(error, `error`) });
         }, 250)
     })
 }
@@ -49,13 +68,13 @@ module.exports.MessageEdited = (client, oldMSG, newMSG, sqlcon) => {
         if (newMSG.toString().length > 1024) newMSG = newMSG.toString().slice(1023);
 
         const sInfo = new Discord.RichEmbed()
-            .setAuthor(`${oldMSG.member.tag} - Message Edited`, oldMSG.author.avatarURL)
+            .setAuthor(`${oldMSG.author.tag} - Message Edited`, oldMSG.author.avatarURL)
             .setDescription(oldMSG)
             .setColor(color)
             .setTimestamp()
             .addField("New message:", `${newMSG}`)
             .addField("Channel", oldMSG.channel);
-        mlogchannel.send(sInfo).catch(O_o => { });
+        mlogchannel.send(sInfo).catch(error => { utils.ConsoleMessage(error, `error`) });
     })
 }
 //#endregion
@@ -68,28 +87,27 @@ module.exports.MemberAdd = (client, member, sqlcon) => {
         let mlogchannel = member.guild.channels.find((channel => channel.id === LogObject.MemberLoggingChannel));
         if (mlogchannel == null) return
 
-        let User = client.users.find(user => user.id === member.id);
-        var cdate = moment(new Date(User.createdAt));
+        var cdate = moment(new Date(member.user.createdAt));
+        var NowDate = moment(new Date(moment().format()));
         let Guild = member.guild;
-        let ageS = moment(cdate).fromNow(true)
-        let ageA = ageS.split(" ");
 
+        const Colour = Math.floor(Math.random() * (embedColours.length - 1) + 1);
 
         const sInfo = new Discord.RichEmbed()
-            .setAuthor(`${member.displayName}`)
-            .setDescription(member + " **has joined the guild**")
-            .setColor('#e450f4')
+            .setAuthor(`${member.user.tag}`)
+            .setDescription(member + " has joined the server")
+            .setColor(embedColours[Colour])
             .setFooter(`User ID: ${member.id}`)
             .setTimestamp()
             .setThumbnail(member.user.avatarURL)
             .addField("Total members", `${Guild.memberCount}`, true)
             .addField("Creation Date:", `${cdate.format("MMMM Do YYYY HH:mm")}\n(${moment(cdate).fromNow()})`, true);
 
-        if (ageA[2] === "seconds" || ageA[1] === "minute" || ageA[1] === "minutes" || ageA[1] === "hour" || ageA[1] === "hours" || ageA[1] === "day" || ageA[1] === "days") {
+        if (NowDate.diff(cdate, 'days') < 31) {
             if (!Guild.roles.find(role => role.name === "Anti-Alt")) MakeAntiAlt(member);
             sInfo.addField("WARNING!", "This account is less than 30 days old, so has been given the Anti-Alt role")
             let Role = member.guild.roles.find(role => role.name === "Anti-Alt")
-            member.addRole(Role).catch(O_o => { });
+            member.addRole(Role).catch(error => { utils.ConsoleMessage(error, `error`); });
 
             member.send(`Thank you for joining ${member.guild.name}, but due to your account age, you have been given the Anti-Alt role which limits your permissions.`)
         }
@@ -98,19 +116,25 @@ module.exports.MemberAdd = (client, member, sqlcon) => {
     })
 }
 module.exports.MemberRemove = (client, member, sqlcon) => {
-    GetLoggingStatus(sqlcon, member.guild.id, function (LogObject) {
+    GetLoggingStatus(sqlcon, member.guild.id, async function (LogObject) {
 
         if (!LogObject.MemberLogging || !LogObject.MemberLoggingChannel) return;
 
-        let logs = member.guild.fetchAuditLogs({ type: 20, limit: 1 }).catch(O_o => { });
+        let logs = await member.guild.fetchAuditLogs({ type: 20, limit: 1 }).catch(error => { utils.ConsoleMessage(error, `error`); });
 
         let mlogchannel = member.guild.channels.find((channel => channel.id === LogObject.MemberLoggingChannel));
         if (mlogchannel == null) return
 
+        const Colour = Math.floor(Math.random() * (embedColours.length - 1) + 1);
+
+        let EmbedColour;
+        if(member.displayHexColor == '#000000' ) EmbedColour = embedColours[Colour];
+        else EmbedColour = member.displayHexColor;
+
         const sInfo = new Discord.RichEmbed()
-            .setDescription(member + " **has left the guild**")
-            .setAuthor(`${member.displayName}`)
-            .setColor(member.displayHexColor)
+            .setDescription(member + " has left the server")
+            .setAuthor(`${member.user.tag}`)
+            .setColor(EmbedColour)
             .setFooter(`User ID: ${member.id}`)
             .setTimestamp()
             .setThumbnail(member.user.avatarURL)
@@ -124,12 +148,13 @@ module.exports.MemberRemove = (client, member, sqlcon) => {
                 let Reason = entry.reason
                 if (!entry.reason) Reason = "No reason given!"
                 let muteEmbed = new Discord.RichEmbed()
-                    .setAuthor(`${member.user.tag} has been kicked`, member.user.avatarURL)
-                    .setColor(member.displayHexColor)
+                    .setAuthor(`${member.user.tag}`, member.user.avatarURL)
+                    .setDescription(`${member} has been kicked from the server`)
+                    .setColor(EmbedColour)
                     .setFooter(`UserID: ${member.user.id}`)
                     .setTimestamp()
                     .setThumbnail(member.user.avatarURL)
-                    .addField(`Kick:`,
+                    .addField(`Kick information:`,
                         `Kicked by ${entry.executor}`
                         + `\n**Time of kick:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
                         + `\nReason: ${Reason}`);
@@ -139,7 +164,7 @@ module.exports.MemberRemove = (client, member, sqlcon) => {
     })
 }
 module.exports.MemberUpdate = (client, oldMem, newMem, sqlcon) => {
-    if(oldMem.nickname == newMem.nickname) return
+
     GetLoggingStatus(sqlcon, oldMem.guild.id, function (LogObject) {
 
         if (!LogObject.MemberLogging || !LogObject.MemberLoggingChannel) return;
@@ -155,44 +180,79 @@ module.exports.MemberUpdate = (client, oldMem, newMem, sqlcon) => {
         else sInfo.addField("Old nickname", oldMem.nickname)
         if (newMem.nickname === null) sInfo.addField("New nickname", "None")
         else sInfo.addField("New nickname", newMem.nickname)
-        mlogchannel.send(sInfo).catch(O_o => { });
+        mlogchannel.send(sInfo).catch(error => { utils.ConsoleMessage(error, `error`); });
     })
 }
-module.exports.AddBan = (client, member, sqlcon) => {
-    GetLoggingStatus(sqlcon, member.guild.id, function (LogObject) {
+module.exports.AddBan = (client, member, guild, sqlcon) => {
+    GetLoggingStatus(sqlcon, guild.id, async function (LogObject) {
 
         if (!LogObject.ModLogging || !LogObject.ModLoggingChannel) return;
 
-        let logs = member.guild.fetchAuditLogs({ type: 22, limit: 1 }).catch(O_o => { });
+        let warnchannel = await guild.channels.find((channel => channel.id === LogObject.ModLoggingChannel));
+        if (warnchannel == undefined) return
+
+        let logs = await guild.fetchAuditLogs({ type: 22, limit: 1 }).catch(error => { utils.ConsoleMessage(error, `error`); });
+
         if (logs.entries == undefined) return
         let entry = logs.entries.first();
 
-        let warnchannel = guild.channels.find((channel => channel.id === LogObject.ModLoggingChannel));
+        if (entry.createdTimestamp < (Date.now() - 5000)) return;
+
+        const Colour = Math.floor(Math.random() * (embedColours.length - 1) + 1);
+
+        let Reason = entry.reason
+        if (!entry.reason) Reason = "No reason given!"
+
+        let muteEmbed = new Discord.RichEmbed()
+            .setAuthor(`${member.tag}`, member.avatarURL)
+            .setDescription(`${member} has been banned from the server`)
+            .setColor(embedColours[Colour])
+            .setFooter(`UserID: ${member.id}`)
+            .setTimestamp()
+            .setThumbnail(member.avatarURL)
+            .addField(`Ban information:`,
+                `Banned by ${entry.executor}`
+                + `\n**Time of ban:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
+                + `\nReason: ${Reason}`);
+
+        warnchannel.send(muteEmbed)
+    })
+}
+module.exports.RemoveBan = (client, user, guild, sqlcon) => {
+    GetLoggingStatus(sqlcon, guild.id, async function (LogObject) {
+
+        if (!LogObject.ModLogging || !LogObject.ModLoggingChannel) return;
+
+        let warnchannel = await guild.channels.find((channel => channel.id === LogObject.ModLoggingChannel));
         if (warnchannel == undefined) return
 
-        if (entry.createdTimestamp > (Date.now() - 5000)) {
-            let Reason = entry.reason
-            if (!entry.reason) Reason = "No reason given!"
-            let muteEmbed = new Discord.RichEmbed()
-                .setAuthor(`${user.username}#${user.discriminator} has been banned`, user.avatarURL)
-                .setColor(user.displayHexColor)
-                .setFooter(`UserID: ${user.id}`)
-                .setTimestamp()
-                .setThumbnail(user.avatarURL)
-                .addField(`Ban:`,
-                    `Banned by ${entry.executor}`
-                    + `\n**Time of ban:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
-                    + `\nReason: ${Reason}`);
-            warnchannel.send(muteEmbed)
-        }
+        let logs = await guild.fetchAuditLogs({ type: 23, limit: 1 }).catch(error => { utils.ConsoleMessage(error, `error`); });
+
+        if (logs.entries == undefined) return
+        let entry = logs.entries.first();
+
+        if (entry.createdTimestamp < (Date.now() - 5000)) return;
+
+        const Colour = Math.floor(Math.random() * (embedColours.length - 1) + 1);
+        let muteEmbed = new Discord.RichEmbed()
+        .setAuthor(`${user.tag}`, user.avatarURL)
+        .setDescription(`${user} has been unbanned from the server`)
+            .setColor(embedColours[Colour])
+            .setFooter(`UserID: ${user.id}`)
+            .setTimestamp()
+            .setThumbnail(user.avatarURL)
+            .addField(`Unban information:`,
+                `Unbanned by ${entry.executor}`
+                + `\n**Time of unban:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`);
+        warnchannel.send(muteEmbed)
+
     })
 }
 //#endregion
 
-
 function GetLoggingStatus(sqlcon, ID, Callback) {
     let LogObject = new Object()
-    sqlcon.query(`SELECT * FROM guildprefs WHERE GuildID = ?`, [ID], (err, logs) => {
+    sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = ?`, [ID], (err, logs) => {
         if (!logs || logs.length < 1) return false
 
         if (logs[0].MemLog == 1) LogObject.MemberLogging = true;

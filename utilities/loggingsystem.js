@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const moment = require("moment");
+const dscp = require('./DragonSCP.js');
 
 const utils = require('./BaseBotFunction.js');
 
@@ -113,6 +114,9 @@ module.exports.MemberAdd = (client, member, sqlcon) => {
         }
 
         mlogchannel.send(sInfo)
+
+
+        
     })
 }
 module.exports.MemberRemove = (client, member, sqlcon) => {
@@ -158,6 +162,7 @@ module.exports.MemberRemove = (client, member, sqlcon) => {
                         `Kicked by ${entry.executor}`
                         + `\n**Time of kick:** ${moment(Date.now()).format('DD MMM YYYY, HH:mm')}`
                         + `\nReason: ${Reason}`);
+                        
                 warnchannel.send(muteEmbed)
             }
         }
@@ -182,6 +187,8 @@ module.exports.MemberUpdate = (client, oldMem, newMem, sqlcon) => {
         else sInfo.addField("New nickname", newMem.nickname)
         mlogchannel.send(sInfo).catch(error => { utils.ConsoleMessage(error, `error`); });
     })
+
+    if(oldMem.guild.id == "403155047527088129") dscp.PatreonMessage(client, oldMem, newMem, sqlcon);
 }
 module.exports.AddBan = (client, member, guild, sqlcon) => {
     GetLoggingStatus(sqlcon, guild.id, async function (LogObject) {

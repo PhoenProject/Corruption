@@ -10,7 +10,7 @@ module.exports.run = async (client, message, MsgContent, prefix, sqlcon) => {
             utils.HelpMessage(client, message, prefix, this.config.name, this.config.subcommands, this.config.info, this.config.perms);
             break;
         default:
-            Action(client, message, this.config.perms[1], MsgContent, sqlcon)
+            Action(client, message, this.config.perms[0], MsgContent, sqlcon)
             break;
 
     }
@@ -62,7 +62,7 @@ async function Action(client, message, perm, MsgContent, sqlcon) {
 
 module.exports.config = {
     name: "unmute", //Name of the command that will be used to call it
-    aliases: ["unstab", "ungag", "unbin", ""], //Aliases of the command that can be used (This must NEVER be left empty)
+    aliases: ["unstab", "ungag", "unbin"], //Aliases of the command that can be used (This must NEVER be left empty)
     info: "Unblocks a user from sending messages and adding new reactions", //Short description of the command that will show on all help embeds
     type: "mod",  //Category in the ?help embed where this command will be visible
     subcommands: [""], //List of sub commands awailable. Help shouldn't ever be included in this list

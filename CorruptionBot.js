@@ -108,7 +108,9 @@ const replies = [
 	`Fuck this window`,
 	`*Fuck this shit i'm out...*`,
 	`Whomst has summoned the almighty one`,
-	`A new hand touches the beacon!`
+	`A new hand touches the beacon!`,
+	`Never gonna give you up\nNever gonna let you down\nNever gonna turn around\nAnd ping you`,
+	`*This is not the bot you're looking for...*`
 ];
 
 const SupportSticky = new Discord.RichEmbed()
@@ -119,6 +121,25 @@ const SupportSticky = new Discord.RichEmbed()
 	.addField("Ingame Support",
 		`For reports from our game servers, please ping the <@&585613595975483423> role`, true)
 	.addField("Discord Support", `For reports from our discord, please ping the <@&585613599817596957> role`, true);
+
+const AppealSticky = new Discord.RichEmbed()
+	.setAuthor(`Appeal info`)
+	.setDescription(`Please make sure you have read #info before requesting support, as that may answer any questions you have`)
+	.setColor('#e450f4')
+	.setTimestamp()
+	.addField("Appeal format",
+		`Failure to follow the format will result in your appeal being denied`
+		+ "```**Ingame Name:**"
+		+ "\n**Time of Ban (And Timezone):**"
+		+ "\n**Why you think you were banned:**"
+		+ "\n**Why should we unban you:**"
+		+ "\n**Additional Notes:**```", true)
+	.addField("Ban managers", `Current ban managers:`
+		+ "\n<@155735396326703104>"
+		+ "\n<@124241068727336963>"
+		+ "\n<@151059487887851520>"
+		+ "\n(If none of these are available, contact any Colonel or higher staff member)"
+		+ "\nIf no-one answers the appeal within 15 minutes, please ping the <@&511249444855873547> role")
 
 // #region Bot events
 client.on("ready", () => {
@@ -134,7 +155,7 @@ client.on("ready", () => {
 		client.user.setPresence({ game: { name: play_act[index], type: "PLAYING" } });
 	}, 120000);
 
-	//Support Sticky
+	//#region Stickies
 	setInterval(() => {
 		let supportChan = client.channels.get("625346775149969445")
 
@@ -154,41 +175,112 @@ client.on("ready", () => {
 		})
 	}, 5000);
 
+	setInterval(() => {
+		let appealChan = client.channels.get("634755210723459082")
+
+		if (!appealChan) return;
+
+		appealChan.fetchMessages({ limit: 1 }).then(messages => {
+			let lastMessage = messages.first();
+			if (!lastMessage || lastMessage.createdAt == null || lastMessage.author.bot) return;
+
+			var lMessageTime = moment(new Date(lastMessage.createdAt));
+			var NowDate = moment(new Date(moment().format()));
+
+			if (NowDate.diff(lMessageTime, 'seconds') < 90) return;
+
+			SupportSticky.setFooter(`DragonSCP staff`, lastMessage.guild.iconURL)
+			appealChan.send(AppealSticky).catch(error => { utils.ConsoleMessage(error, `error`); });
+		})
+	}, 120000);
+	//#endregion
+
 	//Warned role auto removal
 	setInterval(() => {
-		sqlcon.query(`SELECT * FROM Warns`, (err, rows) => {
-			if (err) return utils.ConsoleMessage(err, `error`);
-			if (rows.length < 1) return;
+		let Role = member.guild.roles.find(role => role.name.toLowerCase() === `warned`);
 
-			rows.forEach(element => {
-				if (element.GuildID === undefined || element.UserID === undefined) return;
-				sqlcon.query(`SELECT * FROM Warns WHERE GuildID = ? AND UserID = ?`, [element.GuildID, element.UserID], (err, Warns) => {
-					if (err) return utils.ConsoleMessage(err, `error`)
+		client.guilds.forEach(guild => {
+			guild.roles.find(role => role.name.toLowerCase() === `warned`).members.forEach(member => {
+				sqlcon.query(`SELECT * FROM Warns WHERE GuildID = ? AND UserID = ?`, [guild.id, member.id], (err, Warns) => {
+					if (err) return utils.ConsoleMessage(err, `error`);
 
-					let member = client.guilds.find(guild => guild.id === element.GuildID).members.find(member => member.id === element.UserID)
-					if (member == null) return;
-
-					let warntime = moment(new Date(element.Timestamp));
-					if (Warns.length < 2) return CheckWarnAndremove(member, warntime, 14)
-					else if (Warns.length > 1 && Warns.length < 3) return CheckWarnAndremove(member, warntime, 28)
+					switch (Warns.length) {
+						case 1:
+							HandleRole(guild, member, Warns[0].Timestamp, 14)
+							break;
+						case 2:
+							HandleRole(guild, member, Warns[1].Timestamp, 28)
+							break;
+						default:
+							return;
+					}
 				})
-			});
+			})
 		})
+
+		// sqlcon.query(`SELECT * FROM Warns`, (err, rows) => {
+		// 	if (err) return utils.ConsoleMessage(err, `error`);
+		// 	if (rows.length < 1) return;
+
+		// 	rows.forEach(element => {
+		// 		if (element.GuildID === undefined || element.UserID === undefined) return;
+		// 		sqlcon.query(`SELECT * FROM Warns WHERE GuildID = ? AND UserID = ?`, [element.GuildID, element.UserID], (err, Warns) => {
+		// 			if (err) return utils.ConsoleMessage(err, `error`)
+
+		// 			let guild = client.guilds.find(guild => guild.id === element.GuildID)
+
+		// 			if (guild == null) return;
+
+		// 			let member = guild.members.find(member => member.id === element.UserID)
+		// 			if (member == null) return;
+
+		// 			let warntime = moment(new Date(element.Timestamp));
+		// 			if (Warns.length < 2) return CheckWarnAndremove(member, warntime, 14)
+		// 			else if (Warns.length > 1 && Warns.length < 3) return CheckWarnAndremove(member, warntime, 28)
+		// 		})
+		// 	});
+		// })
 
 	}, 300000);
 });
 
-function CheckWarnAndremove(member, Warntime, Limit) {
+function CheckWarnAndremove(sqlcon, guild, member) {
+
+	sqlcon.query(`SELECT * FROM Warns WHERE GuildID = ? AND UserID = ?`, [guild.id, member.id], (err, Warns) => {
+		if (err) return utils.ConsoleMessage(err, `error`)
+
+		if (Warns.length == 1) HandleRole(guild, member, Warns[0].Timestamp, 14)
+		else if (Warns.length == 2) HandleRole(guild, member, Warns[1].Timestamp, 28)
+		else return
+	})
+
+
 	let nowtime = moment(new Date(moment().format()));
 	let Role = member.guild.roles.find(role => role.name.toLowerCase() === `warned`);
+
+
+	if (member.roles.find(role => role.id === Role.id)) {
+		member.removeRole(Role).catch(error => { return utils.ConsoleMessage(error, `error`); })
+
+		setTimeout(() => {
+			if (!member.roles.find(role => role.id === Role.id))
+				return member.send(`**Notice from ${member.guild.name}:**\nSince it has been more than ${Limit} days since your last warning, your 'Warned' role has been removed!`)
+					.catch(error => { return utils.ConsoleMessage(error, `error`); })
+		}, 250)
+
+	}
+}
+
+function HandleRole(guild, member, Warntime, Limit) {
 	if (nowtime.diff(Warntime, 'days') < Limit) return;
 
 	if (member.roles.find(role => role.id === Role.id)) {
 		member.removeRole(Role).catch(error => { return utils.ConsoleMessage(error, `error`); })
 
 		setTimeout(() => {
-			if (!member.roles.find(role => role.id === Role.id)) return member.send(`**Notice from ${member.guild.name}:**\nSince it has been more than ${Limit} days since your last warning, your 'Warned' role has been removed!`)
-				.catch(error => { return utils.ConsoleMessage(error, `error`); })
+			if (!member.roles.find(role => role.id === Role.id))
+				return member.send(`**Notice from ${member.guild.name}:**\nSince it has been more than ${Limit} days since your last warning, your 'Warned' role has been removed!`)
+					.catch(error => { return utils.ConsoleMessage(error, `error`); })
 		}, 250)
 
 	}
@@ -241,19 +333,15 @@ client.on("messageUpdate", function (oldMSG, newMSG) {
 // #region Message
 client.on("message", async message => {
 
-	if (message.author.id === "323991993501876227") {
-		message.author.send(`Ping!`)
-		message.reply(`Pong!`)
-	}
-
-
 	if (message.author.bot || message.member == null || message.author == null || !message.guild) return
 	else if (message.mentions.users.first() != undefined && message.mentions.users.first().id === client.user.id) return HandleMention(message, message.content.split(' '))
 	else {
 		sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = '${message.guild.id}'`, (err, sqlguild) => {
+			MsgVoteChan(message, sqlcon)
 			autow.globalfilter(client, message, sqlcon);
 			autow.filter(client, message, sqlcon);
 			autow.massping(client, message, sqlcon);
+			autow.VIPPing(client, message, sqlcon);
 
 			MessageCheck(message, sqlguild, sqlcon);
 		});
@@ -281,12 +369,15 @@ function MessageCheck(message, sqlguild, sqlcon) {
 	if (!commandfile || commandfile === null) commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd))
 
 	switch (message.guild.id) {
-		case "499352093019209741": SLExtendedAntiCheatCheck(message, cmd, sqlguild[0].Prefix); break;
+
+		case "499352093019209741": if (message.content.startsWith(sqlguild[0].Prefix)) SLExtendedAntiCheatCheck(message, cmd, sqlguild[0].Prefix); break;
 		case "582850539604279296": BattleOfTwoServers(message); break;
+		//MUST BE CHANGED BACK TO 403155047527088129
 		case "403155047527088129": DragonSCP(message, cmd, sqlguild[0].Prefix); break;
 		default: break;
 	}
-	CheckCommand(message, cmd, commandfile, MsgContent, sqlguild[0].Prefix);
+
+	if (message.content.startsWith(sqlguild[0].Prefix)) CheckCommand(message, cmd, commandfile, MsgContent, sqlguild[0].Prefix);
 }
 function CheckCommand(message, cmd, commandfile, MsgContent, prefix) {
 	switch (cmd) {
@@ -311,9 +402,6 @@ function CheckCommand(message, cmd, commandfile, MsgContent, prefix) {
 		case "help": case "info": case "commands":
 			sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => { utils.help(message, client, rows) })
 			break;
-		case "setup":
-			sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = '${message.guild.id}'`, (err, prefix) => { utils.setup(message, client, prefix) })
-			break;
 		default:
 			if (commandfile) {
 				commandfile.run(client, message, MsgContent, prefix, sqlcon);
@@ -322,15 +410,15 @@ function CheckCommand(message, cmd, commandfile, MsgContent, prefix) {
 	}
 }
 
-function MsgVoteChan(message, sqlcon, sqlguild) {
+function MsgVoteChan(message, sqlcon) {
 	sqlcon.query(`SELECT * FROM MsgVoteChan WHERE channelID = ?`, [message.channel.id], (err, Data) => {
 		if (err) return utils.ConsoleMessage(err, `error`)
 		if (Data.length < 1) return;
 
-		message.react(sqlguild[0].Upvote).catch(error => { utils.ConsoleMessage(error, `error`) });
+		message.react(Data[0].UpVote).catch(error => { utils.ConsoleMessage(error, `error`) });
 		setTimeout(function () {
-			message.react(sqlguild[0].DownVote).catch(error => { utils.ConsoleMessage(error, `error`) })
-		}, 100);
+			message.react(Data[0].DownVote).catch(error => { utils.ConsoleMessage(error, `error`) })
+		}, 10);
 	})
 }
 
@@ -358,9 +446,17 @@ function BattleOfTwoServers(message) {
 }
 function DragonSCP(message, cmd, prefix) {
 	switch (message.channel.id) {
-		case "625346775149969445": dscp.SupportChan(message)
+		case "625346775149969445":
+			dscp.SupportChan(message)
 			break;
-		case "452160531416219658": dscp.StaffBotCommands(client, message, cmd, prefix);
+		case "634755210723459082":
+			dscp.AppealChan(message)
+			break;
+		case "639946290423398412":
+			dscp.DonoChan(client, message, cmd, prefix)
+			break;
+		case "452160531416219658":
+			if (message.content.startsWith(prefix)) dscp.StaffBotCommands(client, message, cmd, prefix);
 			break;
 		default: //TODO - DSCP Stats
 			break;
@@ -385,7 +481,7 @@ function CreateGuildPrefs(guild, sqlcon) {
 	let GuildName = strTest.replace(/'/g, '~');
 	utils.ConsoleMessage(`Corruption just joined ${GuildName}`, `error`)
 	sqlcon.query(`INSERT INTO GuildPrefs (GuildName, GuildID, MemLog, MemLogChan, MsgLog, MsgLogChan, ModLog, ModLogchan, AntiRaid, Prefix, GlobalFilter)
-	VALUES (?, ?, 'false','null','false','null','false','null','?', '1')`, [GuildName, guild.id])
+	VALUES (?, ?, '0','null','0','null','0','null','0',?, '1')`, [GuildName, guild.id, config.prefix])
 }
 
 // #endregion

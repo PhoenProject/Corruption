@@ -10,7 +10,7 @@ module.exports.run = async (client, message, MsgContent, prefix, sqlcon) => {
             utils.HelpMessage(client, message, prefix, this.config.name, this.config.subcommands, this.config.info, this.config.perms);
             break;
         default:
-            Action(client, message, this.config.perms[1], MsgContent, sqlcon)
+            Action(client, message, this.config.perms[0], MsgContent, sqlcon)
             break;
 
     }
@@ -51,8 +51,9 @@ function AddWarn(client, Reason, WarnUser, WarnMember, IssueTime, Issuer, sqlcon
                 .addField(`Total warnings`, WarnCount.length)
                 .addField(`Warning:`, `Issued by: ${Issuer}\n**Issue Time:** ${IssueTime}\nReason: ${Reason}`
                     + `\n[Link to warning](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
+
             sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
-                let warnchannel = message.guild.channels.find((channel => channel.id === ModLog[0].ModLogchan));
+                let warnchannel = message.guild.channels.find((channel => channel.id === ModLog[0].ModLogChan));
                 if (warnchannel == null) return;
 
                 warnchannel.send(WarnEmbed).catch(error => { utils.ConsoleMessage(error, `error`) });

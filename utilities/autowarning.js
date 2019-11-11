@@ -3,12 +3,14 @@ const utils = require('./BaseBotFunction.js');
 const moment = require("moment");
 
 module.exports.globalfilter = (client, message, sqlcon) => {
+    if (message.content.includes("filter remove") || message.content.includes("filter add") || message.member.hasPermission("ADMINISTRATOR") || message.member.hasPermission("MANAGE_GUILD")) return;
+
     sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
         if (!rows[0].GlobalFilter) return;
 
         sqlcon.query(`SELECT * FROM GlobalFilter`, (err, words) => {
+            let msg = message.content.toLowerCase()
             words.forEach(element => {
-                let msg = message.content.toLowerCase()
 
                 if (!msg.includes(element.word)) return;
 
@@ -19,31 +21,30 @@ module.exports.globalfilter = (client, message, sqlcon) => {
     })
 }
 module.exports.filter = (client, message, sqlcon) => {
-    sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = '${message.guild.id}'`, (err, rows) => {
+    if (message.content.includes("filter remove") || message.content.includes("filter add") || message.member.hasPermission("ADMINISTRATOR") || message.member.hasPermission("MANAGE_GUILD")) return;
 
-        if (message.content.includes("filter remove") || message.member.hasPermission("ADMINISTRATOR") || message.member.hasPermission("MANAGE_GUILD")) return
+    sqlcon.query(`SELECT * FROM Filter WHERE GuildID = '${message.guild.id}'`, (err, filtered) => {
+        if (filtered != undefined) {
+            filtered.forEach(element => {
+                if (!message.content.includes(element.word)) return;
 
-        sqlcon.query(`SELECT * FROM filter WHERE GuildID = '${message.guild.id}'`, (err, filtered) => {
-            if (filtered != undefined) {
-                filtered.forEach(element => {
-                    if (!message.content.includes(element.word)) return;
-
-                    let AutoWarnReason = "Saying a filtered word"
-                    let AWUser = message.author
-                    let AWMember = message.member
-                    let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
-                    AddAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
-                    message.delete().catch(error => { utils.ConsoleMessage(error, `error`) })
-                });
-            }
-        })
+                let AutoWarnReason = "Saying a filtered word"
+                let AWUser = message.author
+                let AWMember = message.member
+                let issueTime = moment(Date.now()).format('DD MMM YYYY, HH:mm')
+                AddAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message)
+                message.delete().catch(error => { utils.ConsoleMessage(error, `error`) })
+            });
+        }
     })
 }
 module.exports.massping = (client, message, sqlcon) => {
+    if (!message.member.hasPermission("MANAGE_MESSAGES")) return;
+
     var cdate = moment(new Date(message.member.user.createdAt));
 
     let TotalMentions = message.mentions.members.size + message.mentions.roles.size
-    if (cdate.diff(moment().format(), 'days') > 30) return;
+    if (cdate.diff(moment().format(), 'days') > 90) return;
 
     else if (TotalMentions > 2 && TotalMentions < 5) return message.reply("Please keep the noise down!");
 
@@ -59,13 +60,27 @@ module.exports.massping = (client, message, sqlcon) => {
         message.channel.send("User has been banned from the server!");
     }
 }
+module.exports.VIPPing = (client, message, sqlcon) => {
+    if (message.content.includes("vip remove") || message.content.includes("vip del") || message.content.includes("vip add")
+        || message.member.hasPermission("ADMINISTRATOR") || message.member.hasPermission("MANAGE_MESSAGES") || !message.mentions.members.first()) return;
+
+    sqlcon.query(`SELECT * FROM VIPs WHERE GuildID = '${message.guild.id}'`, (err, VIPs) => {
+
+        VIPs.forEach(VIP => {
+            if (!message.mentions.members.has(VIP.MemberID)) return;
+
+            message.delete().catch(error => { utils.ConsoleMessage(error, `error`) });
+            return AddAutoWarn(client, `Pinging VIP ${message.guild.members.find(user => user.id === VIP.MemberID).user.tag}`, message.author, message.member, moment(Date.now()).format('DD MMM YYYY, HH:mm'), sqlcon, message);
+        });
+    })
+}
 
 function AddAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon, message) {
     sqlcon.query(`INSERT INTO Warns (GuildID, UserID, Reason, Timestamp, Issuer, ChannelID, MessageID) VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [message.guild.id, AWUser.id, AutoWarnReason, issueTime, client.user.id, message.channel.id, message.id]);
 
     setTimeout(() => {
-        sqlcon.query(`SELECT * FROM Warns WHERE UserID = ? AND GuildID = ?`, [targetMember.id, message.guild.id], (err, WarnCount) => {
+        sqlcon.query(`SELECT * FROM Warns WHERE UserID = ? AND GuildID = ?`, [AWMember.id, message.guild.id], (err, WarnCount) => {
 
             let WarnEmbed = new Discord.RichEmbed()
                 .setAuthor(`Warn issued for ${AWUser.tag}`, AWUser.avatarURL)
@@ -76,9 +91,10 @@ function AddAutoWarn(client, AutoWarnReason, AWUser, AWMember, issueTime, sqlcon
                 .addField(`Total warnings`, WarnCount.length)
                 .addField(`Warning:`, `Issued by: ${client.user}\n**Issue Time:** ${issueTime}\nReason: ${AutoWarnReason}`
                     + `\n[Link to warning](https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`);
+
             sqlcon.query(`SELECT * FROM GuildPrefs WHERE GuildID = ${message.guild.id}`, (Error, ModLog) => {
-                let warnchannel = message.guild.channels.find((channel => channel.id === ModLog[0].ModLogchan));
-                if (warnchannel == null) return;
+                let warnchannel = message.guild.channels.find((channel => channel.id === ModLog[0].ModLogChan));
+                if (warnchannel === null) return;
 
                 warnchannel.send(WarnEmbed).catch(error => { utils.ConsoleMessage(error, `error`) });
             })

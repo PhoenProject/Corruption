@@ -10,7 +10,7 @@ module.exports.run = async (client, message, MsgContent, prefix, sqlcon) => {
             utils.HelpMessage(client, message, prefix, this.config.name, this.config.subcommands, this.config.info, this.config.perms);
             break;
         default:
-            Action(client, message, this.config.perms[1], MsgContent, sqlcon)
+            Action(client, message, this.config.perms[0], MsgContent, sqlcon)
             break;
 
     }
